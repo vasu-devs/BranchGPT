@@ -36,15 +36,15 @@ Open [http://localhost:3000](http://localhost:3000)
 | Database | PostgreSQL (Neon/Supabase) |
 | ORM | Drizzle ORM |
 | UI | Tailwind CSS + Shadcn UI |
-| AI | Vercel AI SDK + OpenAI |
+| AI | Vercel AI SDK + Groq (Llama 3.3) |
 
 ## 🔧 Environment Variables
 
 Create a `.env.local` file:
 
 ```env
-DATABASE_URL=postgresql://user:pass@host:5432/db
-OPENAI_API_KEY=sk-your-key
+DATABASE_URL=postgresql://user:pass@host.neon.tech/neondb?sslmode=require
+GROQ_API_KEY=gsk_your-groq-api-key
 ```
 
 ## 🗃️ Database Setup

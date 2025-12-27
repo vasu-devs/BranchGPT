@@ -1,0 +1,24 @@
+# Docker Compose for BranchGPT local development
+# Run: docker compose up -d
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: branchgpt-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: branchgpt
+      POSTGRES_PASSWORD: branchgpt_secret
+      POSTGRES_DB: branchgpt
+    ports:
+      - "5432:5432"
+    volumes:
+      - branchgpt_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U branchgpt -d branchgpt"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  branchgpt_data:

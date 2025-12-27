@@ -14,7 +14,7 @@ export async function getConversationHistory(nodeId: string): Promise<Message[]>
 
     // Traverse up the tree collecting messages
     while (currentId) {
-        const message = await db.query.messages.findFirst({
+        const message: Message | undefined = await db.query.messages.findFirst({
             where: eq(messages.id, currentId),
         });
 
@@ -127,12 +127,24 @@ export async function forkConversation(
 }
 
 /**
- * Initialize a new conversation with a main branch and optional system message
+ * Initialize conversation - returns existing main branch or creates new one
  */
 export async function initializeConversation(
     systemPrompt?: string
 ): Promise<{ branch: typeof branches.$inferSelect; rootMessage?: Message }> {
-    // Create main branch
+    // First, check if a main branch already exists
+    const existingBranch = await db.query.branches.findFirst({
+        where: eq(branches.name, "main"),
+        orderBy: (branches, { desc }) => [desc(branches.createdAt)],
+    });
+
+    if (existingBranch) {
+        // Return existing branch with its head message
+        const head = await getBranchHead(existingBranch.id);
+        return { branch: existingBranch, rootMessage: head || undefined };
+    }
+
+    // Create main branch if none exists
     const [mainBranch] = await db
         .insert(branches)
         .values({
