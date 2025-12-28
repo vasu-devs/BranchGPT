@@ -54,8 +54,12 @@ export default function ChatPage() {
 
 
     const handleMergeBranch = async (branchId: string) => {
-        // Confirmation?
-        if (!confirm("Are you sure you want to merge this branch into its parent?")) return;
+        setMergeConfirmation({ isOpen: true, branchId });
+    };
+
+    const confirmMerge = async () => {
+        const { branchId } = mergeConfirmation;
+        setMergeConfirmation(prev => ({ ...prev, isOpen: false }));
 
         setIsLoading(true);
         try {
@@ -110,6 +114,14 @@ export default function ChatPage() {
         type: "branch",
         branchId: "",
         name: "",
+    });
+
+    const [mergeConfirmation, setMergeConfirmation] = useState<{
+        isOpen: boolean;
+        branchId: string;
+    }>({
+        isOpen: false,
+        branchId: "",
     });
 
     // Load initial list of conversations
@@ -798,22 +810,46 @@ export default function ChatPage() {
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0">
                         <Button
-                            variant="ghost"
+                            variant="outline"
                             onClick={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
-                            className="bg-zinc-100/50 hover:bg-zinc-200/50 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 text-zinc-900"
                         >
                             Cancel
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={confirmDelete}
-                            className="bg-red-600 hover:bg-red-700 text-white"
                         >
                             Delete
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <Dialog open={mergeConfirmation.isOpen} onOpenChange={(open) => setMergeConfirmation(prev => ({ ...prev, isOpen: open }))}>
+                <DialogContent className="bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Merge Branch</DialogTitle>
+                        <DialogDescription className="text-zinc-500 dark:text-zinc-400">
+                            Are you sure you want to merge this branch into its parent? This will summarize the conversation and add it to the parent branch.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            variant="outline"
+                            onClick={() => setMergeConfirmation(prev => ({ ...prev, isOpen: false }))}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={confirmMerge}
+                            className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                        >
+                            Merge Branch
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
         </div>
     );
 }
