@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowUp } from "lucide-react";
+import { Send } from "lucide-react";
 
 interface ChatInputProps {
     onSend: (message: string) => void;
@@ -13,7 +13,7 @@ interface ChatInputProps {
 export function ChatInput({
     onSend,
     disabled = false,
-    placeholder = "Message BranchGPT...",
+    placeholder = "Type a message...",
 }: ChatInputProps) {
     const [input, setInput] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -21,12 +21,13 @@ export function ChatInput({
     useEffect(() => {
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
-            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+            const newHeight = Math.min(textareaRef.current.scrollHeight, 150);
+            textareaRef.current.style.height = `${newHeight}px`;
         }
     }, [input]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = (e?: React.FormEvent) => {
+        e?.preventDefault();
         if (!input.trim() || disabled) return;
         onSend(input.trim());
         setInput("");
@@ -38,35 +39,37 @@ export function ChatInput({
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            handleSubmit(e);
+            handleSubmit();
         }
     };
 
     return (
-        <div className="p-6">
-            <form onSubmit={handleSubmit} className="relative max-w-3xl mx-auto">
-                <div className="relative border border-zinc-200 dark:border-zinc-700 rounded-2xl shadow-lg bg-white dark:bg-zinc-900">
-                    <textarea
-                        ref={textareaRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={placeholder}
-                        disabled={disabled}
-                        rows={1}
-                        className="w-full resize-none bg-transparent pl-5 pr-14 py-4 text-base placeholder:text-zinc-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                        style={{ maxHeight: "200px" }}
-                    />
-                    <Button
-                        type="submit"
-                        disabled={disabled || !input.trim()}
-                        size="icon"
-                        className="absolute right-3 bottom-3 h-10 w-10 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-700 dark:hover:bg-zinc-300 disabled:opacity-30"
-                    >
-                        <ArrowUp className="h-5 w-5" />
-                    </Button>
-                </div>
-            </form>
+        <div className="max-w-3xl mx-auto p-4">
+            <div className="relative flex items-end gap-2 bg-zinc-100 dark:bg-zinc-800 rounded-2xl p-2">
+                <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    rows={1}
+                    className="flex-1 resize-none bg-transparent px-4 py-3 text-[15px] placeholder:text-zinc-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px]"
+                    style={{ maxHeight: "150px" }}
+                />
+                <Button
+                    type="button"
+                    onClick={() => handleSubmit()}
+                    disabled={disabled || !input.trim()}
+                    size="icon"
+                    className="h-12 w-12 shrink-0 rounded-xl bg-black hover:bg-zinc-800 text-white disabled:opacity-40 disabled:bg-zinc-400 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                >
+                    <Send className="h-5 w-5" />
+                </Button>
+            </div>
+            <p className="text-center text-xs text-zinc-500 mt-2">
+                Press Enter to send, Shift+Enter for new line
+            </p>
         </div>
     );
 }

@@ -2,17 +2,21 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Plus,
     MessageSquare,
-    GitBranch,
     PanelLeftClose,
     PanelLeft,
-    ChevronDown,
-    ChevronRight,
+    Trash2,
+    MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Branch {
     id: string;
@@ -28,6 +32,7 @@ interface SidebarProps {
     currentBranchId: string | null;
     onSelectBranch: (branchId: string) => void;
     onNewChat: () => void;
+    onDeleteConversation: (branchId: string) => void;
     isCollapsed?: boolean;
     onToggleCollapse?: () => void;
 }
@@ -37,33 +42,18 @@ export function Sidebar({
     currentBranchId,
     onSelectBranch,
     onNewChat,
+    onDeleteConversation,
     isCollapsed = false,
     onToggleCollapse,
 }: SidebarProps) {
-    const [expandedChats, setExpandedChats] = useState<Set<string>>(new Set(["main"]));
-    
-    // Group branches: main conversation and its child branches
-    const mainBranch = branches.find((b) => b.isMain);
-    const childBranches = branches.filter((b) => !b.isMain);
-
-    const toggleExpand = (chatId: string) => {
-        const newExpanded = new Set(expandedChats);
-        if (newExpanded.has(chatId)) {
-            newExpanded.delete(chatId);
-        } else {
-            newExpanded.add(chatId);
-        }
-        setExpandedChats(newExpanded);
-    };
-
     if (isCollapsed) {
         return (
-            <div className="w-16 h-full bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col items-center py-4 gap-3">
+            <div className="w-14 h-full bg-black border-r border-zinc-900 flex flex-col items-center py-4 gap-3">
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onToggleCollapse}
-                    className="h-10 w-10 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50"
+                    className="h-10 w-10 text-zinc-400 hover:text-white"
                 >
                     <PanelLeft className="h-5 w-5" />
                 </Button>
@@ -71,7 +61,7 @@ export function Sidebar({
                     variant="ghost"
                     size="icon"
                     onClick={onNewChat}
-                    className="h-10 w-10 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50"
+                    className="h-10 w-10 text-zinc-400 hover:text-white"
                 >
                     <Plus className="h-5 w-5" />
                 </Button>
@@ -80,17 +70,22 @@ export function Sidebar({
     }
 
     return (
-        <div className="w-72 h-full bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
+        <div className="w-72 h-full bg-black border-r border-zinc-900 flex flex-col">
             {/* Header */}
-            <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800">
-                <span className="font-semibold text-base tracking-tight">BranchGPT</span>
+            <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-900">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                        <div className="w-4 h-4 bg-black rounded-full" />
+                    </div>
+                    <span className="font-semibold text-lg text-white tracking-tight">BranchGPT</span>
+                </div>
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onToggleCollapse}
-                    className="h-9 w-9 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50"
+                    className="h-8 w-8 text-zinc-500 hover:text-white"
                 >
-                    <PanelLeftClose className="h-5 w-5" />
+                    <PanelLeftClose className="h-4 w-4" />
                 </Button>
             </div>
 
@@ -98,87 +93,87 @@ export function Sidebar({
             <div className="p-4">
                 <Button
                     onClick={onNewChat}
-                    variant="outline"
-                    className="w-full justify-start gap-3 h-11 text-base font-medium border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    className="w-full justify-start gap-3 h-10 bg-white hover:bg-zinc-200 text-black font-medium border border-zinc-200"
                 >
-                    <Plus className="h-5 w-5" />
+                    <Plus className="h-4 w-4" />
                     New Chat
                 </Button>
             </div>
 
-            {/* Chats List */}
-            <ScrollArea className="flex-1 px-3">
-                <div className="space-y-2 pb-4">
-                    {/* Main Conversation with Branches */}
-                    {mainBranch && (
-                        <div className="space-y-1">
-                            {/* Main Chat Header (Collapsible) */}
-                            <div className="flex items-center">
+            {/* Conversations */}
+            <div className="flex-1 overflow-y-auto px-2 pb-4">
+                <div className="space-y-0.5">
+                    <div className="px-3 py-2">
+                        <h3 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
+                            Recent Chats
+                        </h3>
+                    </div>
+                    {branches.length === 0 ? (
+                        <p className="text-zinc-600 text-sm px-3 py-2">No conversations yet</p>
+                    ) : (
+                        branches.map((branch) => (
+                            <div
+                                key={branch.id}
+                                className="group relative flex items-center"
+                            >
                                 <button
-                                    onClick={() => toggleExpand("main")}
-                                    className="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-colors"
-                                >
-                                    {expandedChats.has("main") ? (
-                                        <ChevronDown className="h-4 w-4 text-zinc-500" />
-                                    ) : (
-                                        <ChevronRight className="h-4 w-4 text-zinc-500" />
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => onSelectBranch(mainBranch.id)}
+                                    onClick={() => onSelectBranch(branch.id)}
                                     className={cn(
-                                        "flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors",
-                                        currentBranchId === mainBranch.id
-                                            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
-                                            : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+                                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all",
+                                        currentBranchId === branch.id
+                                            ? "bg-zinc-900 text-white"
+                                            : "hover:bg-zinc-900/50 text-zinc-400 hover:text-zinc-200"
                                     )}
                                 >
-                                    <MessageSquare className="h-5 w-5 shrink-0" />
-                                    <span className="flex-1 text-base font-medium truncate">Main Chat</span>
-                                    <span className="text-sm text-zinc-500">{mainBranch.messageCount}</span>
+                                    <MessageSquare className="h-4 w-4 shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                        <p className={cn(
+                                            "text-sm truncate transition-colors",
+                                            currentBranchId === branch.id ? "font-medium" : "font-normal"
+                                        )}>
+                                            {branch.name}
+                                        </p>
+                                    </div>
                                 </button>
-                            </div>
-
-                            {/* Child Branches (Indented) */}
-                            {expandedChats.has("main") && childBranches.length > 0 && (
-                                <div className="ml-6 pl-3 border-l-2 border-zinc-200 dark:border-zinc-700 space-y-1">
-                                    {childBranches.map((branch) => (
-                                        <button
-                                            key={branch.id}
-                                            onClick={() => onSelectBranch(branch.id)}
-                                            className={cn(
-                                                "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors",
-                                                currentBranchId === branch.id
-                                                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50"
-                                                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
-                                            )}
-                                        >
-                                            <GitBranch className="h-4 w-4 shrink-0 text-zinc-500" />
-                                            <span className="flex-1 text-sm truncate">
-                                                Branch #{branch.name.slice(-6)}
-                                            </span>
-                                            <span className="text-xs text-zinc-500">{branch.messageCount}</span>
-                                        </button>
-                                    ))}
+                                
+                                <div className={cn(
+                                    "absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity",
+                                    currentBranchId === branch.id && "opacity-100"
+                                )}>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-500 hover:text-white hover:bg-zinc-800">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-32 bg-black border-zinc-800 text-white">
+                                            <DropdownMenuItem 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onDeleteConversation(branch.id);
+                                                }}
+                                                className="text-red-500 focus:text-red-400 focus:bg-zinc-900 cursor-pointer"
+                                            >
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Delete
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
-                            )}
-                        </div>
-                    )}
-
-                    {branches.length === 0 && (
-                        <div className="text-center py-12 text-zinc-500">
-                            <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                            <p className="text-base">No chats yet</p>
-                            <p className="text-sm mt-1">Start a new conversation</p>
-                        </div>
+                            </div>
+                        ))
                     )}
                 </div>
-            </ScrollArea>
+            </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
-                <div className="text-sm text-zinc-500 text-center">
-                    Powered by Groq
+            {/* User/Footer */}
+            <div className="p-4 border-t border-zinc-900">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-zinc-800" />
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white">User</p>
+                        <p className="text-xs text-zinc-500 truncate">Free Plan</p>
+                    </div>
                 </div>
             </div>
         </div>

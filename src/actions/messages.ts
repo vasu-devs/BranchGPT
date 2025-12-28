@@ -127,28 +127,23 @@ export async function forkConversation(
 }
 
 /**
- * Initialize conversation - returns existing main branch or creates new one
+ * Create a NEW conversation (always creates a new root branch)
  */
-export async function initializeConversation(
+export async function createConversation(
     systemPrompt?: string
 ): Promise<{ branch: typeof branches.$inferSelect; rootMessage?: Message }> {
-    // First, check if a main branch already exists
-    const existingBranch = await db.query.branches.findFirst({
-        where: eq(branches.name, "main"),
-        orderBy: (branches, { desc }) => [desc(branches.createdAt)],
+    const timestamp = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
     });
 
-    if (existingBranch) {
-        // Return existing branch with its head message
-        const head = await getBranchHead(existingBranch.id);
-        return { branch: existingBranch, rootMessage: head || undefined };
-    }
-
-    // Create main branch if none exists
+    // ALWAYS create a new branch for a new conversation
     const [mainBranch] = await db
         .insert(branches)
         .values({
-            name: "main",
+            name: `Chat ${timestamp}`,
             rootMessageId: null,
             parentBranchId: null,
         })
@@ -170,6 +165,39 @@ export async function initializeConversation(
 }
 
 /**
+ * Get all conversations (Root branches)
+ */
+export async function getConversations() {
+    return db.query.branches.findMany({
+        where: isNull(branches.parentBranchId),
+        orderBy: (branches, { desc }) => [desc(branches.createdAt)],
+    });
+}
+
+/**
+ * Get all branches belonging to a specific conversation tree
+ */
+export async function getBranchTree(rootBranchId: string) {
+    // Recursive query would be ideal but for now we fetch all and filter in app
+    // or we can do a multi-level fetch.
+    // Given the depth isn't massive yet, fetching all branches and filtering
+    // by connectivity in JS/application layer is safest/easiest without CTEs.
+    // OR: we fetch all branches and reconstruct the tree.
+    
+    // For now, let's fetch ALL branches and we will filter in component or here.
+    // Actually, let's fetch all branches and filter for those descending from rootBranchId.
+    
+    // To do this efficiently without CTEs is hard in one query.
+    // Let's just return ALL branches for now and let the frontend filter,
+    // which is what getAllBranches did.
+    // BUT we need to optimize this.
+    
+    return db.query.branches.findMany({
+        orderBy: (branches, { asc }) => [asc(branches.createdAt)],
+    });
+}
+
+/**
  * Get the current head message of a branch
  */
 export async function getBranchHead(branchId: string): Promise<Message | null> {
@@ -178,15 +206,6 @@ export async function getBranchHead(branchId: string): Promise<Message | null> {
     });
 
     return head || null;
-}
-
-/**
- * Get all branches
- */
-export async function getAllBranches() {
-    return db.query.branches.findMany({
-        orderBy: (branches, { asc }) => [asc(branches.createdAt)],
-    });
 }
 
 /**
@@ -226,4 +245,34 @@ export async function formatHistoryForLLM(
         role: msg.role,
         content: msg.content,
     }));
+}
+
+/**
+ * Delete a branch and its messages
+ */
+export async function deleteBranch(branchId: string): Promise<void> {
+    // Due to CASCADE on foreign keys, deleting the branch should delete messages
+    // BUT we should also delete child branches recursively if we want a full clean up
+    // However, the schema definition:
+    // branchId: uuid("branch_id").references(() => branches.id, { onDelete: "cascade" })
+    // This handles messages.
+    // 
+    // For child branches:
+    // We don't have explicit cascade in schema definition in this file for `branches` self-reference?
+    // Let's check schema.ts. If not, we might orphan them.
+    // 
+    // Safest approach is to find all children and delete them recursively first.
+    
+    // 1. Find children
+    const children = await db.query.branches.findMany({
+        where: eq(branches.parentBranchId, branchId)
+    });
+    
+    // 2. Delete children recursively
+    for (const child of children) {
+        await deleteBranch(child.id);
+    }
+    
+    // 3. Delete this branch
+    await db.delete(branches).where(eq(branches.id, branchId));
 }

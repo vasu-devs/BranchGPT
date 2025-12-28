@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Message } from "@/db/schema";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -42,24 +41,17 @@ export function ChatView({
     streamingContent,
 }: ChatViewProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
-    const [autoScroll, setAutoScroll] = useState(true);
     const [forkModalOpen, setForkModalOpen] = useState(false);
     const [forkMessageId, setForkMessageId] = useState<string | null>(null);
     const [forkContent, setForkContent] = useState("");
     const [forkSourceContent, setForkSourceContent] = useState("");
 
+    // Auto-scroll to bottom on new messages
     useEffect(() => {
-        if (autoScroll && scrollRef.current) {
+        if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [messages, streamingContent, autoScroll]);
-
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const target = e.target as HTMLDivElement;
-        const isAtBottom =
-            target.scrollHeight - target.scrollTop - target.clientHeight < 100;
-        setAutoScroll(isAtBottom);
-    };
+    }, [messages, streamingContent]);
 
     const handleForkClick = (messageId: string) => {
         const message = messages.find((m) => m.id === messageId);
@@ -82,112 +74,110 @@ export function ChatView({
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
-            {/* Messages */}
-            <ScrollArea
+            {/* Scrollable Messages Area */}
+            <div
                 ref={scrollRef}
-                className="flex-1"
-                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto"
             >
-                <div className="max-w-3xl mx-auto px-6 py-12 space-y-8">
+                <div className="max-w-3xl mx-auto px-6 py-8">
                     {messages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-24 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-8">
+                        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-6">
                                 <GitBranch className="h-8 w-8 text-zinc-400" />
                             </div>
                             <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
-                                How can I help you today?
+                                Start a conversation
                             </h2>
                             <p className="text-base text-zinc-500 max-w-md leading-relaxed">
-                                Start a conversation. Fork any message to explore different directions.
+                                Ask anything. Fork messages to explore different directions.
                             </p>
                         </div>
                     ) : (
-                        messages.map((message) => (
-                            <div key={message.id} className="message-enter">
+                        <div className="space-y-6">
+                            {messages.map((message) => (
                                 <MessageBubble
+                                    key={message.id}
                                     message={message}
                                     siblingCount={message.siblingCount}
                                     currentSiblingIndex={message.currentSiblingIndex}
                                     onFork={handleForkClick}
                                     onNavigateSibling={onNavigateSibling}
                                 />
-                            </div>
-                        ))
-                    )}
+                            ))}
 
-                    {/* Streaming */}
-                    {streamingContent && (
-                        <div className="message-enter">
-                            <MessageBubble
-                                message={{
-                                    id: "streaming",
-                                    content: streamingContent,
-                                    role: "assistant",
-                                    parentId: null,
-                                    branchId: "",
-                                    isHead: true,
-                                    createdAt: new Date(),
-                                }}
-                                siblingCount={1}
-                                currentSiblingIndex={0}
-                                onFork={() => {}}
-                                onNavigateSibling={() => {}}
-                                isStreaming
-                            />
-                        </div>
-                    )}
+                            {/* Streaming */}
+                            {streamingContent && (
+                                <MessageBubble
+                                    message={{
+                                        id: "streaming",
+                                        content: streamingContent,
+                                        role: "assistant",
+                                        parentId: null,
+                                        branchId: "",
+                                        isHead: true,
+                                        createdAt: new Date(),
+                                    }}
+                                    siblingCount={1}
+                                    currentSiblingIndex={0}
+                                    onFork={() => { }}
+                                    onNavigateSibling={() => { }}
+                                    isStreaming
+                                />
+                            )}
 
-                    {/* Loading */}
-                    {isLoading && !streamingContent && (
-                        <div className="flex justify-start">
-                            <div className="flex items-start gap-4">
-                                <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                                    <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">AI</span>
+                            {/* Loading dots */}
+                            {isLoading && !streamingContent && (
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                                        <span className="text-sm font-semibold text-zinc-500">AI</span>
+                                    </div>
+                                    <div className="flex gap-1.5">
+                                        <span className="w-2.5 h-2.5 bg-zinc-400 rounded-full animate-bounce" />
+                                        <span className="w-2.5 h-2.5 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                                        <span className="w-2.5 h-2.5 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                                    </div>
                                 </div>
-                                <div className="flex gap-1.5 py-3">
-                                    <span className="w-2.5 h-2.5 bg-zinc-300 dark:bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                                    <span className="w-2.5 h-2.5 bg-zinc-300 dark:bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                                    <span className="w-2.5 h-2.5 bg-zinc-300 dark:bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                                </div>
-                            </div>
+                            )}
                         </div>
                     )}
                 </div>
-            </ScrollArea>
+            </div>
 
-            {/* Input */}
-            <ChatInput
-                onSend={onSendMessage}
-                disabled={isLoading}
-                placeholder={isLoading ? "Thinking..." : "Message BranchGPT..."}
-            />
+            {/* Fixed Input Area at Bottom */}
+            <div className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <ChatInput
+                    onSend={onSendMessage}
+                    disabled={isLoading}
+                    placeholder={isLoading ? "Thinking..." : "Type a message..."}
+                />
+            </div>
 
             {/* Fork Dialog */}
             <Dialog open={forkModalOpen} onOpenChange={setForkModalOpen}>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-3 text-lg font-semibold tracking-tight">
+                        <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
                             <GitBranch className="h-5 w-5" />
                             Create Branch
                         </DialogTitle>
                         <DialogDescription className="text-base">
-                            Fork from this point to explore an alternative path.
+                            Fork from this message to explore a different path.
                         </DialogDescription>
                     </DialogHeader>
 
                     {forkSourceContent && (
-                        <div className="rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4">
-                            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2 font-medium">From</p>
-                            <p className="text-base text-zinc-700 dark:text-zinc-300 line-clamp-2 leading-relaxed">
+                        <div className="rounded-xl bg-zinc-100 dark:bg-zinc-800 p-4">
+                            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2 font-medium">Original</p>
+                            <p className="text-base text-zinc-700 dark:text-zinc-300 line-clamp-3">
                                 {forkSourceContent}
                             </p>
                         </div>
                     )}
 
                     <div className="space-y-2">
-                        <label className="text-base font-medium">Your message</label>
+                        <label className="text-base font-medium">Your new message</label>
                         <Textarea
-                            placeholder="What would you like to explore instead?"
+                            placeholder="What would you like to say instead?"
                             value={forkContent}
                             onChange={(e) => setForkContent(e.target.value)}
                             rows={3}
@@ -197,11 +187,11 @@ export function ChatView({
                     </div>
 
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setForkModalOpen(false)} className="text-base">
+                        <Button variant="outline" onClick={() => setForkModalOpen(false)}>
                             Cancel
                         </Button>
-                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()} className="text-base">
-                            Create
+                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()}>
+                            Create Branch
                         </Button>
                     </DialogFooter>
                 </DialogContent>
