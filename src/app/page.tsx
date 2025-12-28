@@ -35,6 +35,7 @@ import {
     generateBranchTitle,
     updateBranchName,
     mergeBranch,
+    getConversationsWithCounts,
 } from "@/actions/messages";
 
 interface MessageWithMeta extends Message {
@@ -137,26 +138,14 @@ export default function ChatPage() {
     useEffect(() => {
         const init = async () => {
             try {
-                const roots = await getConversations();
-                const conversationsWithCount: BranchInfo[] = await Promise.all(
-                    roots.map(async (branch) => {
-                        const head = await getBranchHead(branch.id);
-                        let messageCount = 0;
-                        if (head) {
-                            const history = await getConversationHistory(head.id);
-                            messageCount = history.length;
-                        }
-                        return {
-                            id: branch.id,
-                            name: branch.name,
-                            messageCount,
-                            createdAt: branch.createdAt,
-                            parentBranchId: null,
-                            rootMessageId: null,
-                        };
-                    })
-                );
-                setConversations(conversationsWithCount);
+                // Optimized single query fetch
+                const conversationsWithCount = await getConversationsWithCounts();
+
+                setConversations(conversationsWithCount.map(c => ({
+                    ...c,
+                    // Ensure types match BranchInfo
+                    isMerged: c.isMerged ?? false
+                })));
 
                 // If no conversations, create one
                 if (conversationsWithCount.length === 0) {

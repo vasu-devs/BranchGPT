@@ -1,7 +1,7 @@
 "use server";
 
 import { db, messages, branches, type Message, type NewMessage, type NewBranch } from "@/db";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, sql, desc } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { generateText } from "ai";
 import { groq } from "@ai-sdk/groq";
@@ -192,6 +192,43 @@ export async function getConversations() {
         where: and(isNull(branches.parentBranchId), eq(branches.userId, userId)),
         orderBy: (branches, { desc }) => [desc(branches.createdAt)],
     });
+}
+
+/**
+ * Optimized fetch for sidebar: Gets conversations + message counts in ONE query.
+ */
+export async function getConversationsWithCounts() {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+
+    // We need to import 'count' and 'sql' from drizzle-orm if not available, 
+    // but we can use db.execute or query builder.
+    // Let's use the query builder with sql count.
+
+    const result = await db.select({
+        id: branches.id,
+        name: branches.name,
+        createdAt: branches.createdAt,
+        messageCount: sql<number>`count(${messages.id})`.mapWith(Number),
+        parentBranchId: branches.parentBranchId,
+        rootMessageId: branches.rootMessageId,
+        isMerged: branches.isMerged,
+    })
+        .from(branches)
+        .leftJoin(messages, eq(branches.id, messages.branchId))
+        .where(and(isNull(branches.parentBranchId), eq(branches.userId, userId)))
+        .groupBy(branches.id)
+        .orderBy(desc(branches.createdAt));
+
+    return result as {
+        id: string;
+        name: string;
+        createdAt: Date;
+        messageCount: number;
+        parentBranchId: string | null;
+        rootMessageId: string | null;
+        isMerged: boolean | null
+    }[];
 }
 
 /**
