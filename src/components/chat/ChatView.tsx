@@ -79,7 +79,7 @@ export function ChatView({
             {/* Scrollable Messages Area */}
             <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto"
+                className="flex-1 overflow-y-auto no-scrollbar"
             >
                 <div className="max-w-3xl mx-auto px-6 py-8">
                     {messages.length === 0 ? (

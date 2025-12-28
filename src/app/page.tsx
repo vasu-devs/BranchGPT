@@ -773,7 +773,7 @@ export default function ChatPage() {
     }
 
     return (
-        <div className="flex h-screen bg-white dark:bg-black flex-col md:flex-row">
+        <div className="flex h-[100dvh] bg-white dark:bg-black flex-col md:flex-row">
             {/* Mobile Header */}
             <header className="md:hidden h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white dark:bg-black shrink-0 relative z-30">
                 <Sheet>
@@ -831,7 +831,7 @@ export default function ChatPage() {
             </div>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-background border-x border-zinc-200 dark:border-zinc-800 shadow-sm z-10">
+            <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-background border-x border-zinc-200 dark:border-zinc-800 shadow-sm z-10 overflow-hidden">
                 <ChatView
                     messages={messages}
                     branchName={branchName}
