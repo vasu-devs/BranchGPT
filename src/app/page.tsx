@@ -783,6 +783,7 @@ export default function ChatPage() {
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0 w-[300px]">
+                        <SheetTitle className="sr-only">Navigation</SheetTitle>
                         <Sidebar
                             branches={conversations}
                             currentBranchId={currentConversationId}
@@ -802,6 +803,7 @@ export default function ChatPage() {
                         </Button>
                     </SheetTrigger>
                     <SheetContent side="right" className="p-0 w-[300px] border-l">
+                        <SheetTitle className="sr-only">Git Tree</SheetTitle>
                         <GitTree
                             branches={currentTreeBranches}
                             currentBranchId={currentBranchId}
