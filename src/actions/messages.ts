@@ -5,6 +5,7 @@ import { eq, and, isNull } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
 import { generateText } from "ai";
 import { groq } from "@ai-sdk/groq";
+import { cookies } from "next/headers";
 
 /**
  * Recursively fetches the conversation history from a node back to root.
@@ -106,6 +107,9 @@ export async function forkConversation(
         throw new Error("Source message not found");
     }
 
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+
     // Create new branch
     const [newBranch] = await db
         .insert(branches)
@@ -113,6 +117,7 @@ export async function forkConversation(
             name: branchName || `Branch ${Date.now()}`,
             rootMessageId: sourceNodeId,
             parentBranchId: sourceMessage.branchId,
+            userId,
         })
         .returning();
 
@@ -141,6 +146,9 @@ export async function createConversation(
         minute: '2-digit'
     });
 
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+
     // ALWAYS create a new branch for a new conversation
     const [mainBranch] = await db
         .insert(branches)
@@ -148,6 +156,7 @@ export async function createConversation(
             name: `Chat ${timestamp}`,
             rootMessageId: null,
             parentBranchId: null,
+            userId,
         })
         .returning();
 
@@ -170,8 +179,11 @@ export async function createConversation(
  * Get all conversations (Root branches)
  */
 export async function getConversations() {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+
     return db.query.branches.findMany({
-        where: isNull(branches.parentBranchId),
+        where: and(isNull(branches.parentBranchId), eq(branches.userId, userId)),
         orderBy: (branches, { desc }) => [desc(branches.createdAt)],
     });
 }
@@ -307,7 +319,7 @@ export async function mergeBranch(branchId: string): Promise<string> {
 
     // 2. Get history
     const { history, branchName } = await prepareMergeContext(branchId);
-    
+
     // 3. Format transcript
     const transcript = history.map(msg => `**${msg.role.toUpperCase()}**: ${msg.content}`).join("\n\n");
     const mergeContent = `Has merged branch "**${branchName}**".\n\n### Transcript:\n${transcript}`;
@@ -316,19 +328,19 @@ export async function mergeBranch(branchId: string): Promise<string> {
     // Check if parent has a head, we might need to append to it. 
     // Actually createMessage handles attaching to parentId if provided, but here we are appending to the *end* of the parent branch.
     // We need the head of the parent branch to be the parent of this new message.
-    
+
     const parentHead = await getBranchHead(branch.parentBranchId);
-    
+
     // If parent has no messages (unlikely if it's a parent), use parent's root? 
     // If parent head is null, it means its empty or verified elsewhere.
-    
-    let parentMessageId = parentHead ? parentHead.id : branch.rootMessageId; 
+
+    let parentMessageId = parentHead ? parentHead.id : branch.rootMessageId;
     // Fallback to rootMessageId is risky if rootMessageId belongs to grand-parent. 
     // But if parentBranchId exists, there must be a path.
-    
+
     if (!parentMessageId) {
-         // Fallback if truly nothing found (shouldn't happen for valid fork)
-         throw new Error("Could not find insertion point in parent branch");
+        // Fallback if truly nothing found (shouldn't happen for valid fork)
+        throw new Error("Could not find insertion point in parent branch");
     }
 
     await createMessage({
