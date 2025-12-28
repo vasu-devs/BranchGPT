@@ -75,7 +75,7 @@ export default function ChatPage() {
             await handleSelectConversation(currentConversationId!);
 
             // Switch to parent branch which now has the transcript
-            await handleSelectBranch(parentBranchId);
+            await handleSelectBranch(parentBranchId, undefined, true);
 
         } catch (error) {
             console.error("Failed to merge branch:", error);
@@ -252,7 +252,7 @@ export default function ChatPage() {
         }
     }, []);
 
-    const handleSelectBranch = async (branchId: string, branchesOverride?: BranchInfo[]) => {
+    const handleSelectBranch = async (branchId: string, branchesOverride?: BranchInfo[], forceRefresh = false) => {
         try {
             const branchList = branchesOverride || currentTreeBranches;
             const branch = branchList.find((b) => b.id === branchId);
@@ -261,7 +261,7 @@ export default function ChatPage() {
             setBranchName(branch?.name || "Unknown");
 
             // Check cache first
-            if (conversationCache[branchId]) {
+            if (!forceRefresh && conversationCache[branchId]) {
                 setMessages(conversationCache[branchId]);
                 const lastMsg = conversationCache[branchId][conversationCache[branchId].length - 1];
                 setCurrentNodeId(lastMsg?.id || null);

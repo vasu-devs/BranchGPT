@@ -80,20 +80,32 @@ export function MessageBubble({
 
     // AI Message
     return (
-        <motion.div
+        <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="flex gap-4 group py-2"
         >
             {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-zinc-900 dark:bg-white flex items-center justify-center shrink-0 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-                <span className="text-sm font-bold text-white dark:text-zinc-900">AI</span>
+            <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border shadow-sm",
+                message.role === "system" 
+                    ? "bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800"
+                    : "bg-zinc-900 dark:bg-white border-zinc-200 dark:border-zinc-800"
+            )}>
+                {message.role === "system" ? (
+                    <GitBranch className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                ) : (
+                    <span className="text-sm font-bold text-white dark:text-zinc-900">AI</span>
+                )}
             </div>
             {/* Content */}
             <div className="flex-1 min-w-0 pt-1">
                 <div className="prose prose-zinc dark:prose-invert max-w-none">
-                    <p className="text-[15px] leading-relaxed text-foreground whitespace-pre-wrap">
+                    <p className={cn(
+                        "text-[15px] leading-relaxed whitespace-pre-wrap",
+                        message.role === "system" ? "text-amber-800 dark:text-amber-200 italic" : "text-foreground"
+                    )}>
                         {message.content}
                         {isStreaming && (
                             <span className="inline-block w-2 h-5 ml-1 bg-foreground animate-pulse rounded-sm" />
