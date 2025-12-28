@@ -1,13 +1,11 @@
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import {
-    Plus,
-    MessageSquare,
-    PanelLeftClose,
-    PanelLeft,
-    Trash2,
-    MoreHorizontal,
-} from "lucide-react";
+import { PanelCloseIcon } from "@/components/icons/PanelCloseIcon";
+import { PanelIcon } from "@/components/icons/PanelIcon";
+import { PlusIcon } from "@/components/icons/PlusIcon";
+import { ChatIcon } from "@/components/icons/ChatIcon";
+import { DeleteIcon } from "@/components/icons/DeleteIcon";
+import { MoreIcon } from "@/components/icons/MoreIcon";
 import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
@@ -46,7 +44,7 @@ export function Sidebar({
     onToggleCollapse,
 }: SidebarProps) {
     return (
-        <motion.div 
+        <motion.div
             initial={false}
             animate={{ width: isCollapsed ? 60 : 300 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -57,7 +55,7 @@ export function Sidebar({
                 <div className="h-16 px-4 flex items-center justify-between border-b border-border/50">
                     <AnimatePresence mode="wait">
                         {!isCollapsed && (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
@@ -76,7 +74,7 @@ export function Sidebar({
                         onClick={onToggleCollapse}
                         className="h-8 w-8 text-muted-foreground hover:text-foreground"
                     >
-                        {isCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+                        {isCollapsed ? <PanelIcon className="h-4 w-4" /> : <PanelCloseIcon className="h-4 w-4" />}
                     </Button>
                 </div>
 
@@ -90,7 +88,7 @@ export function Sidebar({
                         )}
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                        <Plus className="h-4 w-4 shrink-0" />
+                        <PlusIcon className="h-4 w-4 shrink-0" />
                         {!isCollapsed && <span>New Chat</span>}
                     </Button>
                 </div>
@@ -121,7 +119,7 @@ export function Sidebar({
                                         )}
                                         title={isCollapsed ? branch.name : undefined}
                                     >
-                                        <MessageSquare className="h-4 w-4 shrink-0" />
+                                        <ChatIcon className="h-4 w-4 shrink-0" />
                                         {!isCollapsed && (
                                             <div className="flex-1 min-w-0 z-10">
                                                 <p className={cn(
@@ -141,7 +139,7 @@ export function Sidebar({
                                             />
                                         )}
                                     </button>
-                                    
+
                                     {!isCollapsed && (
                                         <div className={cn(
                                             "absolute right-2 opacity-0 group-hover:opacity-100 transition-opacity z-20",
@@ -150,18 +148,18 @@ export function Sidebar({
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50">
-                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <MoreIcon className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="glass-panel w-32">
-                                                    <DropdownMenuItem 
+                                                    <DropdownMenuItem
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             onDeleteConversation(branch.id);
                                                         }}
                                                         className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer"
                                                     >
-                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        <DeleteIcon className="mr-2 h-4 w-4" />
                                                         Delete
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>

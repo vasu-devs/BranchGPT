@@ -14,6 +14,15 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import {
+    Sheet,
+    SheetContent,
+    SheetTrigger,
+    SheetDescription,
+    SheetTitle,
+} from "@/components/ui/sheet";
+import { MenuIcon } from "@/components/icons/MenuIcon";
+import { BranchIcon } from "@/components/icons/BranchIcon";
+import {
     getConversationHistory,
     createMessage,
     forkConversation,
@@ -764,17 +773,58 @@ export default function ChatPage() {
     }
 
     return (
-        <div className="flex h-screen bg-white dark:bg-black">
-            {/* Sidebar - Lists Conversations */}
-            <Sidebar
-                branches={conversations}
-                currentBranchId={currentConversationId}
-                onSelectBranch={handleSelectConversation}
-                onNewChat={handleNewChat}
-                onDeleteConversation={handleDeleteConversation}
-                isCollapsed={sidebarCollapsed}
-                onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-            />
+        <div className="flex h-screen bg-white dark:bg-black flex-col md:flex-row">
+            {/* Mobile Header */}
+            <header className="md:hidden h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white dark:bg-black shrink-0 relative z-30">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon" className="-ml-2">
+                            <MenuIcon className="h-5 w-5" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="p-0 w-[300px]">
+                        <Sidebar
+                            branches={conversations}
+                            currentBranchId={currentConversationId}
+                            onSelectBranch={handleSelectConversation}
+                            onNewChat={handleNewChat}
+                            onDeleteConversation={handleDeleteConversation}
+                        />
+                    </SheetContent>
+                </Sheet>
+
+                <span className="font-semibold text-sm">BranchGPT</span>
+
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon" className="-mr-2">
+                            <BranchIcon className="h-5 w-5" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="right" className="p-0 w-[300px] border-l">
+                        <GitTree
+                            branches={currentTreeBranches}
+                            currentBranchId={currentBranchId}
+                            onSelectBranch={handleSelectBranch}
+                            onDeleteBranch={handleDeleteBranch}
+                            onMergeBranch={handleMergeBranch}
+                        />
+                    </SheetContent>
+                </Sheet>
+            </header>
+
+            {/* Sidebar - Lists Conversations (Desktop) */}
+            <div className="hidden md:flex h-full shrink-0">
+                <Sidebar
+                    branches={conversations}
+                    currentBranchId={currentConversationId}
+                    onSelectBranch={handleSelectConversation}
+                    onNewChat={handleNewChat}
+                    onDeleteConversation={handleDeleteConversation}
+                    isCollapsed={sidebarCollapsed}
+                    onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                />
+            </div>
 
             {/* Main Chat Area */}
             <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-background border-x border-zinc-200 dark:border-zinc-800 shadow-sm z-10">
@@ -789,16 +839,18 @@ export default function ChatPage() {
                 />
             </main>
 
-            {/* Git Tree - Lists Branches for Current Conversation */}
-            <GitTree
-                branches={currentTreeBranches}
-                currentBranchId={currentBranchId}
-                onSelectBranch={handleSelectBranch}
-                onDeleteBranch={handleDeleteBranch}
-                onMergeBranch={handleMergeBranch}
-                isCollapsed={gitTreeCollapsed}
-                onToggleCollapse={() => setGitTreeCollapsed(!gitTreeCollapsed)}
-            />
+            {/* Git Tree (Desktop) */}
+            <div className="hidden md:flex h-full shrink-0">
+                <GitTree
+                    branches={currentTreeBranches}
+                    currentBranchId={currentBranchId}
+                    onSelectBranch={handleSelectBranch}
+                    onDeleteBranch={handleDeleteBranch}
+                    onMergeBranch={handleMergeBranch}
+                    isCollapsed={gitTreeCollapsed}
+                    onToggleCollapse={() => setGitTreeCollapsed(!gitTreeCollapsed)}
+                />
+            </div>
 
             <Dialog open={deleteConfirmation.isOpen} onOpenChange={(open) => setDeleteConfirmation(prev => ({ ...prev, isOpen: open }))}>
                 <DialogContent className="bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white sm:max-w-md">

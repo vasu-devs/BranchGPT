@@ -1,7 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { GitBranch, GitCommit, PanelRightClose, PanelRight, Trash2 } from "lucide-react";
+
+import { BranchIcon } from "@/components/icons/BranchIcon";
+import { MergeIcon } from "@/components/icons/MergeIcon";
+import { DeleteIcon } from "@/components/icons/DeleteIcon";
+import { PanelIcon } from "@/components/icons/PanelIcon";
+import { PanelCloseIcon } from "@/components/icons/PanelCloseIcon";
 import { cn } from "@/lib/utils";
 
 interface GitTreeProps {
@@ -41,7 +46,7 @@ export function GitTree({
                     onClick={onToggleCollapse}
                     className="h-9 w-9 mb-4 text-zinc-400 hover:text-white"
                 >
-                    <PanelRight className="h-4 w-4" />
+                    <PanelIcon className="h-4 w-4" />
                 </Button>
                 <div className="flex-1 flex flex-col items-center gap-3 mt-4">
                     {branches.slice(0, 6).map((branch) => (
@@ -67,7 +72,7 @@ export function GitTree({
             {/* Header */}
             <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900">
                 <div className="flex items-center gap-2">
-                    <GitBranch className="h-4 w-4 text-zinc-900 dark:text-white" />
+                    <BranchIcon className="h-4 w-4 text-zinc-900 dark:text-white" />
                     <span className="font-medium text-sm text-zinc-900 dark:text-white">Tree</span>
                 </div>
                 <Button
@@ -76,7 +81,7 @@ export function GitTree({
                     onClick={onToggleCollapse}
                     className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                 >
-                    <PanelRightClose className="h-4 w-4" />
+                    <PanelCloseIcon className="h-4 w-4" />
                 </Button>
             </div>
 
@@ -84,7 +89,7 @@ export function GitTree({
             <div className="flex-1 overflow-y-auto p-4">
                 {branches.length === 0 ? (
                     <div className="text-center py-8 text-zinc-600">
-                        <GitBranch className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                        <BranchIcon className="h-8 w-8 mx-auto mb-2 opacity-40" />
                         <p className="text-sm">No branches</p>
                     </div>
                 ) : (
@@ -102,7 +107,7 @@ export function GitTree({
                                                 : "hover:bg-zinc-200/50 dark:hover:bg-zinc-900/50 border border-transparent"
                                         )}
                                     >
-                                        <GitCommit className={cn(
+                                        <BranchIcon className={cn(
                                             "h-4 w-4",
                                             currentBranchId === mainBranch.id ? "text-zinc-900 dark:text-white" : "text-zinc-500"
                                         )} />
@@ -197,7 +202,7 @@ function BranchNode({
                                 : "hover:bg-zinc-200/50 dark:hover:bg-zinc-900/50 border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-300"
                         )}
                     >
-                        <GitBranch className={cn("h-3.5 w-3.5", branch.isMerged ? "text-purple-400" : "opacity-70")} />
+                        <BranchIcon className={cn("h-3.5 w-3.5", branch.isMerged ? "text-purple-400" : "opacity-70")} />
                         <span className={cn("font-mono truncate text-xs", branch.isMerged && "text-zinc-500 line-through")}>
                             {branchLabel}
                         </span>
@@ -221,7 +226,7 @@ function BranchNode({
                                             : "text-zinc-300 cursor-not-allowed"
                                     )}
                                 >
-                                    <GitCommit className="h-3.5 w-3.5" />
+                                    <MergeIcon className="h-3.5 w-3.5" />
                                 </button>
                             )}
                             <button
@@ -232,7 +237,7 @@ function BranchNode({
                                 title="Delete Branch"
                                 className="h-6 w-6 flex items-center justify-center rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                             >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <DeleteIcon className="h-3.5 w-3.5" />
                             </button>
                         </div>
                     )}
