@@ -790,6 +790,7 @@ export default function ChatPage() {
                             onSelectBranch={handleSelectConversation}
                             onNewChat={handleNewChat}
                             onDeleteConversation={handleDeleteConversation}
+                            isMobile={true}
                         />
                     </SheetContent>
                 </Sheet>
@@ -810,6 +811,7 @@ export default function ChatPage() {
                             onSelectBranch={handleSelectBranch}
                             onDeleteBranch={handleDeleteBranch}
                             onMergeBranch={handleMergeBranch}
+                            isMobile={true}
                         />
                     </SheetContent>
                 </Sheet>

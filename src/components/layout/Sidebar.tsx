@@ -32,6 +32,7 @@ interface SidebarProps {
     onDeleteConversation: (branchId: string) => void;
     isCollapsed?: boolean;
     onToggleCollapse?: () => void;
+    isMobile?: boolean;
 }
 
 export function Sidebar({
@@ -42,41 +43,47 @@ export function Sidebar({
     onDeleteConversation,
     isCollapsed = false,
     onToggleCollapse,
+    isMobile = false,
 }: SidebarProps) {
     return (
         <motion.div
             initial={false}
-            animate={{ width: isCollapsed ? 60 : 300 }}
+            animate={{ width: isMobile ? "100%" : (isCollapsed ? 60 : 300) }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="h-full bg-sidebar/80 dark:bg-black/80 backdrop-blur-xl border-r border-border flex flex-col z-20"
+            className={cn(
+                "h-full bg-sidebar/80 dark:bg-black/80 backdrop-blur-xl flex flex-col z-20",
+                !isMobile && "border-r border-border"
+            )}
         >
             <div className="flex flex-col h-full">
-                {/* Header */}
-                <div className="h-16 px-4 flex items-center justify-between border-b border-border/50">
-                    <AnimatePresence mode="wait">
-                        {!isCollapsed && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="flex items-center gap-3 overflow-hidden"
-                            >
-                                <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center shrink-0">
-                                    <div className="w-4 h-4 bg-background rounded-full" />
-                                </div>
-                                <span className="font-semibold text-lg tracking-tight whitespace-nowrap">BranchGPT</span>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onToggleCollapse}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                    >
-                        {isCollapsed ? <PanelIcon className="h-4 w-4" /> : <PanelCloseIcon className="h-4 w-4" />}
-                    </Button>
-                </div>
+                {/* Header - Hide on Mobile since Sheet has context */}
+                {!isMobile && (
+                    <div className="h-16 px-4 flex items-center justify-between border-b border-border/50">
+                        <AnimatePresence mode="wait">
+                            {!isCollapsed && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="flex items-center gap-3 overflow-hidden"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center shrink-0">
+                                        <div className="w-4 h-4 bg-background rounded-full" />
+                                    </div>
+                                    <span className="font-semibold text-lg tracking-tight whitespace-nowrap">BranchGPT</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onToggleCollapse}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        >
+                            {isCollapsed ? <PanelIcon className="h-4 w-4" /> : <PanelCloseIcon className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                )}
 
                 {/* New Chat Button */}
                 <div className="p-4">

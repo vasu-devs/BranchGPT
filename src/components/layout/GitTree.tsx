@@ -23,6 +23,7 @@ interface GitTreeProps {
     onMergeBranch?: (branchId: string) => void;
     isCollapsed?: boolean;
     onToggleCollapse?: () => void;
+    isMobile?: boolean;
 }
 
 export function GitTree({
@@ -33,6 +34,7 @@ export function GitTree({
     onMergeBranch,
     isCollapsed = false,
     onToggleCollapse,
+    isMobile = false,
 }: GitTreeProps) {
     const mainBranch = branches.find((b) => b.name === "main" || !b.parentBranchId);
     const childBranches = branches.filter((b) => b.parentBranchId);
@@ -68,22 +70,27 @@ export function GitTree({
     }
 
     return (
-        <div className="w-[300px] h-full bg-zinc-50 dark:bg-black border-l border-zinc-200 dark:border-zinc-900 flex flex-col">
-            {/* Header */}
-            <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900">
-                <div className="flex items-center gap-2">
-                    <BranchIcon className="h-4 w-4 text-zinc-900 dark:text-white" />
-                    <span className="font-medium text-sm text-zinc-900 dark:text-white">Tree</span>
+        <div className={cn(
+            "h-full bg-zinc-50 dark:bg-black flex flex-col",
+            isMobile ? "w-full" : "w-[300px] border-l border-zinc-200 dark:border-zinc-900"
+        )}>
+            {/* Header - Hide on Mobile */}
+            {!isMobile && (
+                <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900">
+                    <div className="flex items-center gap-2">
+                        <BranchIcon className="h-4 w-4 text-zinc-900 dark:text-white" />
+                        <span className="font-medium text-sm text-zinc-900 dark:text-white">Tree</span>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onToggleCollapse}
+                        className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                    >
+                        <PanelCloseIcon className="h-4 w-4" />
+                    </Button>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onToggleCollapse}
-                    className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-                >
-                    <PanelCloseIcon className="h-4 w-4" />
-                </Button>
-            </div>
+            )}
 
             {/* Tree */}
             <div className="flex-1 overflow-y-auto p-4">
