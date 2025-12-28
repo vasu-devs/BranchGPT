@@ -43,32 +43,38 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Light Mode - Zinc Palette */
+/* Light Mode - Zinc Palette Premium */
 :root {
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --background: #ffffff;
-  --foreground: #18181b;
+  --foreground: #09090b; /* Zinc 950 */
+  
+  /* Glass & Surface */
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --sidebar-bg: rgba(250, 250, 250, 0.8); /* Zinc 50 alpha */
+  
+  /* Gradients */
+  --gradient-subtle: linear-gradient(to bottom right, #ffffff, #f4f4f5);
+  --gradient-surface: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+  
   --card: #ffffff;
-  --card-foreground: #18181b;
+  --card-foreground: #09090b;
   --popover: #ffffff;
-  --popover-foreground: #18181b;
-  --primary: #18181b;
+  --popover-foreground: #09090b;
+  --primary: #18181b; /* Zinc 900 */
   --primary-foreground: #fafafa;
-  --secondary: #f4f4f5;
+  --secondary: #f4f4f5; /* Zinc 100 */
   --secondary-foreground: #18181b;
   --muted: #f4f4f5;
-  --muted-foreground: #71717a;
+  --muted-foreground: #71717a; /* Zinc 500 */
   --accent: #f4f4f5;
   --accent-foreground: #18181b;
   --destructive: #ef4444;
-  --border: #e4e4e7;
+  --border: #e4e4e7; /* Zinc 200 */
   --input: #e4e4e7;
   --ring: #18181b;
-  --chart-1: #18181b;
-  --chart-2: #71717a;
-  --chart-3: #a1a1aa;
-  --chart-4: #d4d4d8;
-  --chart-5: #f4f4f5;
+  
   --sidebar: #fafafa;
   --sidebar-foreground: #18181b;
   --sidebar-primary: #18181b;
@@ -79,31 +85,37 @@
   --sidebar-ring: #18181b;
 }
 
-/* Dark Mode - Zinc Palette */
+/* Dark Mode - Zinc Palette Premium */
 .dark {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card: #18181b;
+  --background: #000000; /* Pure Black */
+  --foreground: #fafafa; /* Zinc 50 */
+  
+  /* Glass & Surface */
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(9, 9, 11, 0.6); /* Zinc 950 alpha */
+  --sidebar-bg: rgba(9, 9, 11, 0.8);
+  
+  /* Gradients */
+  --gradient-subtle: linear-gradient(to bottom right, #09090b, #000000);
+  --gradient-surface: linear-gradient(to bottom, rgba(24, 24, 27, 0.5), rgba(9, 9, 11, 0.2));
+  
+  --card: #18181b; /* Zinc 900 */
   --card-foreground: #fafafa;
   --popover: #18181b;
   --popover-foreground: #fafafa;
   --primary: #fafafa;
   --primary-foreground: #18181b;
-  --secondary: #27272a;
+  --secondary: #27272a; /* Zinc 800 */
   --secondary-foreground: #fafafa;
   --muted: #27272a;
-  --muted-foreground: #a1a1aa;
+  --muted-foreground: #a1a1aa; /* Zinc 400 */
   --accent: #27272a;
   --accent-foreground: #fafafa;
-  --destructive: #ef4444;
+  --destructive: #7f1d1d;
   --border: #27272a;
   --input: #27272a;
-  --ring: #fafafa;
-  --chart-1: #fafafa;
-  --chart-2: #a1a1aa;
-  --chart-3: #71717a;
-  --chart-4: #3f3f46;
-  --chart-5: #27272a;
+  --ring: #d4d4d8;
+  
   --sidebar: #18181b;
   --sidebar-foreground: #fafafa;
   --sidebar-primary: #fafafa;
@@ -121,36 +133,43 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-image: var(--gradient-subtle);
+    background-attachment: fixed;
   }
 }
 
-/* Minimal scrollbar */
+@layer utilities {
+  .glass {
+    @apply bg-white/60 dark:bg-zinc-950/60 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-800/50;
+  }
+  
+  .glass-panel {
+    @apply bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200/50 dark:border-zinc-800/50 shadow-sm;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-zinc-900 via-zinc-600 to-zinc-900 dark:from-white dark:via-zinc-300 dark:to-zinc-500;
+  }
+}
+
+/* Minimal scrollbar - thinner */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
-  border-radius: 3px;
+  background: #e4e4e7;
+  border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1aa;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: #27272a;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
   background: #52525b;
-}
-
-/* Message animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.message-enter {
-  animation: fadeIn 0.2s ease-out;
 }

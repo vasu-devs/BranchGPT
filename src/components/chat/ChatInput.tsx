@@ -44,8 +44,8 @@ export function ChatInput({
     };
 
     return (
-        <div className="max-w-3xl mx-auto p-4">
-            <div className="relative flex items-end gap-2 bg-zinc-100 dark:bg-zinc-800 rounded-2xl p-2">
+        <div className="max-w-3xl mx-auto px-4">
+            <div className="relative flex items-end gap-2 glass-panel rounded-2xl p-2 shadow-lg hover:shadow-xl transition-shadow duration-300">
                 <textarea
                     ref={textareaRef}
                     value={input}
@@ -54,7 +54,7 @@ export function ChatInput({
                     placeholder={placeholder}
                     disabled={disabled}
                     rows={1}
-                    className="flex-1 resize-none bg-transparent px-4 py-3 text-[15px] placeholder:text-zinc-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px]"
+                    className="flex-1 resize-none bg-transparent px-4 py-3 text-[15px] placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 min-h-[48px]"
                     style={{ maxHeight: "150px" }}
                 />
                 <Button
@@ -62,7 +62,7 @@ export function ChatInput({
                     onClick={() => handleSubmit()}
                     disabled={disabled || !input.trim()}
                     size="icon"
-                    className="h-12 w-12 shrink-0 rounded-xl bg-black hover:bg-zinc-800 text-white disabled:opacity-40 disabled:bg-zinc-400 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                    className="h-12 w-12 shrink-0 rounded-xl bg-foreground text-background hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-sm transition-all"
                 >
                     <Send className="h-5 w-5" />
                 </Button>

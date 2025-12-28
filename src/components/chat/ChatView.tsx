@@ -73,7 +73,7 @@ export function ChatView({
     };
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
+        <div className="flex flex-col h-full bg-transparent">
             {/* Scrollable Messages Area */}
             <div
                 ref={scrollRef}
@@ -82,10 +82,10 @@ export function ChatView({
                 <div className="max-w-3xl mx-auto px-6 py-8">
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-6">
-                                <GitBranch className="h-8 w-8 text-zinc-400" />
+                            <div className="w-16 h-16 rounded-2xl bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center mb-6 backdrop-blur-sm">
+                                <GitBranch className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
                             </div>
-                            <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 mb-3">
+                            <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-3">
                                 Start a conversation
                             </h2>
                             <p className="text-base text-zinc-500 max-w-md leading-relaxed">
@@ -144,7 +144,7 @@ export function ChatView({
             </div>
 
             {/* Fixed Input Area at Bottom */}
-            <div className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+            <div className="bg-gradient-to-t from-background via-background/80 to-transparent pt-10 pb-2">
                 <ChatInput
                     onSend={onSendMessage}
                     disabled={isLoading}

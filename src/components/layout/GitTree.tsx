@@ -40,7 +40,7 @@ export function GitTree({
 
     if (isCollapsed) {
         return (
-            <div className="w-14 h-full bg-black border-l border-zinc-900 flex flex-col items-center py-4">
+            <div className="w-14 h-full bg-zinc-50 dark:bg-black border-l border-zinc-200 dark:border-zinc-900 flex flex-col items-center py-4">
                 <Button
                     variant="ghost"
                     size="icon"
@@ -58,8 +58,8 @@ export function GitTree({
                             className={cn(
                                 "w-2.5 h-2.5 rounded-full transition-all border",
                                 currentBranchId === branch.id
-                                    ? "bg-white border-white ring-2 ring-zinc-800"
-                                    : "bg-black border-zinc-600 hover:border-zinc-400"
+                                    ? "bg-white dark:bg-white border-zinc-300 dark:border-white ring-2 ring-zinc-200 dark:ring-zinc-800"
+                                    : "bg-zinc-200 dark:bg-black border-zinc-300 dark:border-zinc-600 hover:border-zinc-400 dark:hover:border-zinc-400"
                             )}
                         />
                     ))}
@@ -69,18 +69,18 @@ export function GitTree({
     }
 
     return (
-        <div className="w-64 h-full bg-black border-l border-zinc-900 flex flex-col">
+        <div className="w-64 h-full bg-zinc-50 dark:bg-black border-l border-zinc-200 dark:border-zinc-900 flex flex-col">
             {/* Header */}
-            <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-900">
+            <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900">
                 <div className="flex items-center gap-2">
-                    <GitBranch className="h-4 w-4 text-white" />
-                    <span className="font-medium text-sm text-white">Tree</span>
+                    <GitBranch className="h-4 w-4 text-zinc-900 dark:text-white" />
+                    <span className="font-medium text-sm text-zinc-900 dark:text-white">Tree</span>
                 </div>
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onToggleCollapse}
-                    className="h-8 w-8 text-zinc-500 hover:text-white"
+                    className="h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                 >
                     <PanelRightClose className="h-4 w-4" />
                 </Button>
@@ -104,29 +104,29 @@ export function GitTree({
                                         className={cn(
                                             "flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-left transition-all",
                                             currentBranchId === mainBranch.id
-                                                ? "bg-zinc-900 border border-zinc-800"
-                                                : "hover:bg-zinc-900/50 border border-transparent"
+                                                ? "bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+                                                : "hover:bg-zinc-200/50 dark:hover:bg-zinc-900/50 border border-transparent"
                                         )}
                                     >
                                         <GitCommit className={cn(
                                             "h-4 w-4",
-                                            currentBranchId === mainBranch.id ? "text-white" : "text-zinc-500"
+                                            currentBranchId === mainBranch.id ? "text-zinc-900 dark:text-white" : "text-zinc-500"
                                         )} />
                                         <div className="flex-1 min-w-0">
                                             <p className={cn(
                                                 "text-sm",
-                                                currentBranchId === mainBranch.id ? "text-white font-medium" : "text-zinc-400"
+                                                currentBranchId === mainBranch.id ? "text-zinc-900 dark:text-white font-medium" : "text-zinc-500 dark:text-zinc-400"
                                             )}>main</p>
                                         </div>
                                         {currentBranchId === mainBranch.id && (
-                                            <span className="text-[10px] font-bold bg-white text-black px-1.5 py-0.5 rounded">HEAD</span>
+                                            <span className="text-[10px] font-bold bg-zinc-900 dark:bg-white text-white dark:text-black px-1.5 py-0.5 rounded">HEAD</span>
                                         )}
                                     </button>
                                 </div>
 
                                 {/* Child branches from main */}
                                 {childBranches.filter((b) => b.parentBranchId === mainBranch.id).length > 0 && (
-                                    <div className="ml-5 mt-2 border-l border-zinc-800 pl-4 space-y-2">
+                                    <div className="ml-5 mt-2 border-l border-zinc-200 dark:border-zinc-800 pl-4 space-y-2">
                                         {childBranches
                                             .filter((b) => b.parentBranchId === mainBranch.id)
                                             .map((branch) => (
@@ -149,15 +149,15 @@ export function GitTree({
                 )}
             </div>
 
-             {/* Footer Legend */}
-             <div className="p-4 border-t border-zinc-900 text-[11px] text-zinc-500">
+            {/* Footer Legend */}
+            <div className="p-4 border-t border-zinc-200 dark:border-zinc-900 text-[11px] text-zinc-500">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full border border-white bg-black" />
+                        <div className="w-2 h-2 rounded-full border border-zinc-400 dark:border-white bg-zinc-200 dark:bg-black" />
                         <span>Current</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full border border-zinc-600 bg-black" />
+                        <div className="w-2 h-2 rounded-full border border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-black" />
                         <span>Branch</span>
                     </div>
                 </div>
@@ -192,15 +192,15 @@ function BranchNode({
         <div>
             {/* Connector line */}
             <div className="relative group">
-                <div className="absolute -left-4 top-1/2 w-4 h-px bg-zinc-800" />
+                <div className="absolute -left-4 top-1/2 w-4 h-px bg-zinc-200 dark:bg-zinc-800" />
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => onSelectBranch(branch.id)}
                         className={cn(
                             "flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-sm border",
                             isActive
-                                ? "bg-zinc-900 border-zinc-800 text-white"
-                                : "hover:bg-zinc-900/50 border-transparent text-zinc-400 hover:text-zinc-300"
+                                ? "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white"
+                                : "hover:bg-zinc-200/50 dark:hover:bg-zinc-900/50 border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-300"
                         )}
                     >
                         <GitBranch className={cn("h-3.5 w-3.5", branch.isMerged ? "text-purple-400" : "opacity-70")} />
@@ -213,17 +213,17 @@ function BranchNode({
                     {!isMain && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-white hover:bg-zinc-900"
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900"
                                 >
                                     <MoreHorizontal className="h-3.5 w-3.5" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-black border-zinc-800 min-w-[150px]">
+                            <DropdownMenuContent align="end" className="bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 min-w-[150px]">
                                 {onMergeBranch && !branch.isMerged && branch.parentBranchId && (
-                                    <DropdownMenuItem 
+                                    <DropdownMenuItem
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onMergeBranch(branch.id);
@@ -236,7 +236,7 @@ function BranchNode({
                                         Merge into Parent
                                     </DropdownMenuItem>
                                 )}
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onDeleteBranch(branch.id);

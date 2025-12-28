@@ -76,6 +76,12 @@ export async function createMessage(
             .update(messages)
             .set({ isHead: false })
             .where(and(eq(messages.branchId, data.branchId), eq(messages.isHead, true)));
+    } else {
+        // If no parent (root message), ensure no other heads exist ensuring single head safety
+         await db
+            .update(messages)
+            .set({ isHead: false })
+            .where(and(eq(messages.branchId, data.branchId), eq(messages.isHead, true)));
     }
 
     const [newMessage] = await db
@@ -217,6 +223,7 @@ export async function getBranchTree(rootBranchId: string) {
 export async function getBranchHead(branchId: string): Promise<Message | null> {
     const head = await db.query.messages.findFirst({
         where: and(eq(messages.branchId, branchId), eq(messages.isHead, true)),
+        orderBy: (messages, { desc }) => [desc(messages.createdAt)],
     });
 
     return head || null;
@@ -354,5 +361,6 @@ export async function mergeBranch(branchId: string): Promise<string> {
     // 5. Mark as merged
     await db.update(branches).set({ isMerged: true }).where(eq(branches.id, branchId));
 
+    console.log(`[mergeBranch] Successfully merged ${branchId} into ${branch.parentBranchId}`);
     return branch.parentBranchId;
 }

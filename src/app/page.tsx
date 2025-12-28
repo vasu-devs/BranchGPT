@@ -740,10 +740,10 @@ export default function ChatPage() {
 
     if (!isInitialized) {
         return (
-            <div className="flex items-center justify-center h-screen bg-black">
+            <div className="flex items-center justify-center h-screen bg-white dark:bg-black">
                 <div className="text-center">
-                    <div className="w-12 h-12 rounded-full border border-zinc-800 bg-black flex items-center justify-center mx-auto mb-4 animate-pulse">
-                        <span className="text-white font-bold text-lg">B</span>
+                    <div className="w-12 h-12 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black flex items-center justify-center mx-auto mb-4 animate-pulse">
+                        <span className="text-zinc-900 dark:text-white font-bold text-lg">B</span>
                     </div>
                     <p className="text-zinc-500 text-sm">Loading BranchGPT...</p>
                 </div>
@@ -752,7 +752,7 @@ export default function ChatPage() {
     }
 
     return (
-        <div className="flex h-screen bg-black">
+        <div className="flex h-screen bg-white dark:bg-black">
             {/* Sidebar - Lists Conversations */}
             <Sidebar
                 branches={conversations}
@@ -765,7 +765,7 @@ export default function ChatPage() {
             />
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-zinc-950 border-x border-zinc-900">
+            <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-background border-x border-zinc-200 dark:border-zinc-800 shadow-sm z-10">
                 <ChatView
                     messages={messages}
                     branchName={branchName}
@@ -789,10 +789,10 @@ export default function ChatPage() {
             />
 
             <Dialog open={deleteConfirmation.isOpen} onOpenChange={(open) => setDeleteConfirmation(prev => ({ ...prev, isOpen: open }))}>
-                <DialogContent className="bg-black border-zinc-800 text-white">
+                <DialogContent className="bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Delete {deleteConfirmation.type === "branch" ? "Branch" : "Chat"}</DialogTitle>
-                        <DialogDescription className="text-zinc-400">
+                        <DialogDescription className="text-zinc-500 dark:text-zinc-400">
                             Are you sure you want to delete "{deleteConfirmation.name}"? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
@@ -800,7 +800,7 @@ export default function ChatPage() {
                         <Button
                             variant="ghost"
                             onClick={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
-                            className="bg-zinc-900 text-white hover:bg-zinc-800"
+                            className="bg-zinc-100/50 hover:bg-zinc-200/50 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 text-zinc-900"
                         >
                             Cancel
                         </Button>
