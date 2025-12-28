@@ -4,6 +4,15 @@ import { useState, useCallback, useEffect } from "react";
 import { ChatView } from "@/components/chat";
 import { Sidebar, GitTree } from "@/components/layout";
 import { Message } from "@/db/schema";
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import {
     getConversationHistory,
     createMessage,
@@ -14,6 +23,9 @@ import {
     getBranchHead,
     getBranchTree,
     deleteBranch,
+    generateBranchTitle,
+    updateBranchName,
+    mergeBranch,
 } from "@/actions/messages";
 
 interface MessageWithMeta extends Message {
@@ -29,11 +41,50 @@ interface BranchInfo {
     isMain?: boolean;
     parentBranchId: string | null;
     rootMessageId: string | null;
+    isMerged?: boolean;
 }
 
 export default function ChatPage() {
     const [messages, setMessages] = useState<MessageWithMeta[]>([]);
     const [conversations, setConversations] = useState<BranchInfo[]>([]);
+    // ... (start of component)
+
+    // ... existing code ...
+
+
+
+    const handleMergeBranch = async (branchId: string) => {
+        // Confirmation?
+        if (!confirm("Are you sure you want to merge this branch into its parent?")) return;
+
+        setIsLoading(true);
+        try {
+            const parentBranchId = await mergeBranch(branchId);
+
+            // Invalidate cache for parent branch so we fetch the new merge message
+            setConversationCache(prev => {
+                const newCache = { ...prev };
+                delete newCache[parentBranchId];
+                return newCache;
+            });
+
+            // Reload tree/conversations to reflect merged status
+            // Ideally we just update local state but let's re-fetch to be safe and simple
+            // In a real app we'd optimistic update
+
+            await handleSelectConversation(currentConversationId!);
+
+            // Switch to parent branch which now has the transcript
+            await handleSelectBranch(parentBranchId);
+
+        } catch (error) {
+            console.error("Failed to merge branch:", error);
+            alert("Failed to merge branch");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
     const [currentBranchId, setCurrentBranchId] = useState<string | null>(null);
     const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
@@ -45,6 +96,21 @@ export default function ChatPage() {
     const [currentTreeBranches, setCurrentTreeBranches] = useState<BranchInfo[]>([]);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [gitTreeCollapsed, setGitTreeCollapsed] = useState(false);
+    // Cache for conversation history: branchId -> messages
+    const [conversationCache, setConversationCache] = useState<Record<string, MessageWithMeta[]>>({});
+
+    // Deletion confirmation state
+    const [deleteConfirmation, setDeleteConfirmation] = useState<{
+        isOpen: boolean;
+        type: "conversation" | "branch";
+        branchId: string;
+        name: string;
+    }>({
+        isOpen: false,
+        type: "branch",
+        branchId: "",
+        name: "",
+    });
 
     // Load initial list of conversations
     useEffect(() => {
@@ -92,24 +158,24 @@ export default function ChatPage() {
     const handleSelectConversation = async (rootBranchId: string) => {
         try {
             setCurrentConversationId(rootBranchId);
-            
+
             // 1. Get all branches for this tree
             const allBranches = await getBranchTree(rootBranchId);
-            
+
             // Filter branches relevant to this tree (descendants of root)
             // Since our backend currently fetches all, we filter here
             // But actually we need to traverse down from rootBranchId
             // A simple way is to find all branches where root or parent chain leads to rootBranchId
-            
+
             // For now, let's just assume we want branches that are EITHER the root
             // OR have a parent in the list recursively.
             // Efficient approach: Build map of parent->children
-            
+
             const treeBranches = allBranches.filter(b => true); // Placeholder - let's refine this
-            
+
             // Actually, we can just use a recursive check or build the tree
             // Since we know the root, we can find its children, then their children...
-            
+
             const buildTreeIds = (branches: typeof allBranches, rootId: string): Set<string> => {
                 const ids = new Set<string>([rootId]);
                 let added = true;
@@ -147,12 +213,12 @@ export default function ChatPage() {
                     };
                 })
             );
-            
+
             setCurrentTreeBranches(branchesWithCount);
 
             // 2. Select the "HEAD" of this conversation (root branch head)
             await handleSelectBranch(rootBranchId, branchesWithCount);
-            
+
         } catch (error) {
             console.error("Failed to select conversation:", error);
         }
@@ -172,6 +238,15 @@ export default function ChatPage() {
                 })
             );
             setMessages(messagesWithMeta);
+
+            // Update cache
+            if (messagesWithMeta.length > 0) {
+                const branchId = messagesWithMeta[messagesWithMeta.length - 1].branchId;
+                setConversationCache(prev => ({
+                    ...prev,
+                    [branchId]: messagesWithMeta
+                }));
+            }
         } catch (error) {
             console.error("Failed to load conversation:", error);
         }
@@ -181,17 +256,32 @@ export default function ChatPage() {
         try {
             const branchList = branchesOverride || currentTreeBranches;
             const branch = branchList.find((b) => b.id === branchId);
-            const head = await getBranchHead(branchId);
-            
+
             setCurrentBranchId(branchId);
             setBranchName(branch?.name || "Unknown");
-            
+
+            // Check cache first
+            if (conversationCache[branchId]) {
+                setMessages(conversationCache[branchId]);
+                const lastMsg = conversationCache[branchId][conversationCache[branchId].length - 1];
+                setCurrentNodeId(lastMsg?.id || null);
+                return; // Skip server fetch if cached
+            }
+
+            // Only fetch if not in cache
+            const head = await getBranchHead(branchId);
+
             if (head) {
                 setCurrentNodeId(head.id);
                 await loadConversation(head.id);
             } else {
                 setCurrentNodeId(null);
                 setMessages([]);
+                // Cache empty state
+                setConversationCache(prev => ({
+                    ...prev,
+                    [branchId]: []
+                }));
             }
         } catch (error) {
             console.error("Failed to switch branch:", error);
@@ -201,7 +291,7 @@ export default function ChatPage() {
     const handleNewChat = async () => {
         try {
             const { branch, rootMessage } = await createConversation();
-            
+
             // Add to conversations list
             const newConv: BranchInfo = {
                 id: branch.id,
@@ -212,9 +302,9 @@ export default function ChatPage() {
                 rootMessageId: null,
                 isMain: true
             };
-            
+
             setConversations(prev => [newConv, ...prev]);
-            
+
             // Select it (will trigger tree load)
             // But since it's new/empty, we can shortcut
             setCurrentConversationId(branch.id);
@@ -223,7 +313,7 @@ export default function ChatPage() {
             setBranchName(branch.name);
             setMessages([]);
             setCurrentNodeId(null);
-            
+
         } catch (error) {
             console.error("Failed to create new chat:", error);
         }
@@ -245,7 +335,11 @@ export default function ChatPage() {
                 body: JSON.stringify({ messages: aiMessages }),
             });
 
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
 
             const reader = response.body?.getReader();
             const decoder = new TextDecoder();
@@ -289,15 +383,23 @@ export default function ChatPage() {
             currentSiblingIndex: 0,
         };
 
-        setMessages((prev) => [...prev, optimisticMessage]);
-        
+        setMessages((prev) => {
+            const newMessages = [...prev, optimisticMessage];
+            // Update cache immediately
+            setConversationCache(cache => ({
+                ...cache,
+                [currentBranchId]: newMessages
+            }));
+            return newMessages;
+        });
+
         // Save current state for rollback if needed (basic)
         const previousNodeId = currentNodeId;
 
         try {
             // Note: We don't set CurrentNodeId to tempId because dependent actions need real ID
             // But for UI it's fine.
-            
+
             const userMessage = await createMessage({
                 content,
                 role: "user",
@@ -305,21 +407,29 @@ export default function ChatPage() {
                 branchId: currentBranchId,
                 isHead: true,
             });
-            
+
             setCurrentNodeId(userMessage.id);
 
             // Replace optimistic message with real onel
-            setMessages((prev) => 
-                prev.map(msg => msg.id === tempId ? {
+            setMessages((prev) => {
+                const newMessages = prev.map(msg => msg.id === tempId ? {
                     ...userMessage,
                     siblingCount: 1, // simplified for now
                     currentSiblingIndex: 0
-                } : msg)
-            );
+                } : msg);
+
+                // Update cache with real ID
+                setConversationCache(cache => ({
+                    ...cache,
+                    [currentBranchId]: newMessages
+                }));
+
+                return newMessages;
+            });
 
             // We need to fetch siblings correctly now that it's persisted
             // But for performance effectively we just leave it as is until next load
-            
+
             const aiResponse = await streamAIResponse(content);
             if (aiResponse && currentBranchId) {
                 const savedMessage = await createMessage({
@@ -332,21 +442,28 @@ export default function ChatPage() {
                 setCurrentNodeId(savedMessage.id);
                 // Clear streaming FIRST, then append the saved message in same tick
                 setStreamingContent(undefined);
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        ...savedMessage,
-                        siblingCount: 1,
-                        currentSiblingIndex: 0,
-                    },
-                ]);
-                
-                // Update branch message counts (optional optimization, for now reload tree)
+                setMessages((prev) => {
+                    const newMessages = [
+                        ...prev,
+                        {
+                            ...savedMessage,
+                            siblingCount: 1,
+                            currentSiblingIndex: 0,
+                        },
+                    ];
+                    // Update cache
+                    setConversationCache(cache => ({
+                        ...cache,
+                        [currentBranchId]: newMessages
+                    }));
+                    return newMessages;
+                });
+
                 if (currentConversationId) {
                     // Silent update of tree
                     getBranchTree(currentConversationId).then(allBranches => {
                         // Re-run filter logic (duplicated for now, should refactor)
-                         const buildTreeIds = (branches: typeof allBranches, rootId: string): Set<string> => {
+                        const buildTreeIds = (branches: typeof allBranches, rootId: string): Set<string> => {
                             const ids = new Set<string>([rootId]);
                             let added = true;
                             while (added) {
@@ -382,19 +499,33 @@ export default function ChatPage() {
                                 };
                             })
                         ).then(branchesWithCount => {
-                             setCurrentTreeBranches(branchesWithCount);
+                            setCurrentTreeBranches(branchesWithCount);
                         });
+                    });
+                }
+
+                // If this is the START of a new conversation (or a branch with default name), trigger naming
+                if (messages.length === 0 && currentBranchId) {
+                    generateBranchTitle(content).then(async (name) => {
+                        if (!currentBranchId) return;
+                        await updateBranchName(currentBranchId, name);
+                        setBranchName(name);
+
+                        // Update local state for sidebar and tree
+                        setConversations(prev => prev.map(c => c.id === currentBranchId ? { ...c, name } : c));
+                        setCurrentTreeBranches(prev => prev.map(b => b.id === currentBranchId ? { ...b, name } : b));
                     });
                 }
             } else {
                 setStreamingContent(undefined);
             }
+
         } catch (error) {
             console.error("Failed to send message:", error);
             // Rollback optimistic update
             setMessages((prev) => prev.filter(m => m.id !== tempId));
             setStreamingContent(undefined);
-            alert("Failed to send message. Please try again.");
+            alert(`Failed to send message: ${error instanceof Error ? error.message : "Unknown error"}`);
         }
     };
 
@@ -403,8 +534,8 @@ export default function ChatPage() {
         if (!newContent.trim()) return;
 
         const optimisticBranchId = `temp-branch-${Date.now()}`;
-        const optimisticBranchName = `Branch...`; 
-        
+        const optimisticBranchName = `Branch...`;
+
         // 1. Optimistic UI update for branch switch
         const optimisticBranch: BranchInfo = {
             id: optimisticBranchId,
@@ -415,23 +546,23 @@ export default function ChatPage() {
             rootMessageId: messageId,
             isMain: false
         };
-        
+
         // Add to tree immediately
         setCurrentTreeBranches(prev => [...prev, optimisticBranch]);
         setCurrentBranchId(optimisticBranchId);
         setBranchName(optimisticBranchName);
-        
+
         // We also need to show the chat starting with the history up to messageId + new message
         // This is tricky because we need the history of the messageId.
         // We can grab it from current `messages` if messageId is in it.
         const messageIndex = messages.findIndex(m => m.id === messageId);
         let optimisticMessages: MessageWithMeta[] = [];
-        
+
         if (messageIndex !== -1) {
             optimisticMessages = messages.slice(0, messageIndex + 1);
             // Add the new optimistic message
-             const tempMsgId = `temp-fork-msg-${Date.now()}`;
-             optimisticMessages.push({
+            const tempMsgId = `temp-fork-msg-${Date.now()}`;
+            optimisticMessages.push({
                 id: tempMsgId,
                 content: newContent,
                 role: "user",
@@ -441,23 +572,28 @@ export default function ChatPage() {
                 createdAt: new Date(),
                 siblingCount: 1,
                 currentSiblingIndex: 0,
-             });
-             setMessages(optimisticMessages);
+            });
+            setMessages(optimisticMessages);
+            // Update cache for new branch
+            setConversationCache(cache => ({
+                ...cache,
+                [optimisticBranchId]: optimisticMessages
+            }));
         } else {
             // Fallback: just clear or wait? 
             // If we can't find the history locally, we can't be purely optimistic about the history content.
             // But usually forking happens from a visible message.
-             setMessages([]); 
+            setMessages([]);
         }
 
         try {
             const { branch, message } = await forkConversation(messageId, newContent, "user");
-            
+
             // 2. Fix up state with real data
             setCurrentBranchId(branch.id);
             setBranchName(branch.name);
             setCurrentNodeId(message.id);
-            
+
             // Update the branch in the tree list
             setCurrentTreeBranches(prev => prev.map(b => b.id === optimisticBranchId ? {
                 ...b,
@@ -467,7 +603,7 @@ export default function ChatPage() {
                 parentBranchId: branch.parentBranchId,
                 rootMessageId: branch.rootMessageId
             } : b));
-            
+
             // Load the ACTUAL forked conversation history to be safe and accurate
             // (Takes a moment but user sees optimistic version meanwhile)
             await loadConversation(message.id);
@@ -492,6 +628,15 @@ export default function ChatPage() {
                         currentSiblingIndex: 0,
                     },
                 ]);
+
+                // Trigger Branch Naming
+                generateBranchTitle(newContent).then(async (name) => {
+                    await updateBranchName(branch.id, name);
+                    setBranchName(name); // If we are still on this branch
+
+                    // Update tree list
+                    setCurrentTreeBranches(prev => prev.map(b => b.id === branch.id || b.id === optimisticBranchId ? { ...b, name, id: branch.id } : b));
+                });
             } else {
                 setStreamingContent(undefined);
             }
@@ -501,9 +646,9 @@ export default function ChatPage() {
             // Rollback
             setCurrentTreeBranches(prev => prev.filter(b => b.id !== optimisticBranchId));
             alert("Failed to create branch.");
-             // Ideally revert to previous branch but that state is lost here easily
-             // Re-select original branch?
-             if (currentBranchId) handleSelectBranch(currentBranchId);
+            // Ideally revert to previous branch but that state is lost here easily
+            // Re-select original branch?
+            if (currentBranchId) handleSelectBranch(currentBranchId);
         }
     };
 
@@ -528,56 +673,68 @@ export default function ChatPage() {
         }
     };
 
-    const handleDeleteConversation = async (branchId: string) => {
-        if (!confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
-        
-        try {
-            await deleteBranch(branchId);
-            
-            // Update local state
-            const newConversations = conversations.filter(c => c.id !== branchId);
-            setConversations(newConversations);
-            
-            // If we deleted the current conversation, switch to another
-            if (currentConversationId === branchId) {
-                if (newConversations.length > 0) {
-                    await handleSelectConversation(newConversations[0].id);
-                } else {
-                    await handleNewChat();
-                }
-            }
-        } catch (error) {
-            console.error("Failed to delete conversation:", error);
-        }
+    const handleDeleteConversation = (branchId: string) => {
+        const branch = conversations.find((c) => c.id === branchId);
+        if (!branch) return;
+        setDeleteConfirmation({
+            isOpen: true,
+            type: "conversation",
+            branchId,
+            name: branch.name,
+        });
     };
 
-    const handleDeleteBranch = async (branchId: string) => {
-        if (!confirm("Are you sure you want to delete this branch?")) return;
-        
+    const handleDeleteBranch = (branchId: string) => {
+        const branch = currentTreeBranches.find((b) => b.id === branchId);
+        if (!branch) return;
+        setDeleteConfirmation({
+            isOpen: true,
+            type: "branch",
+            branchId,
+            name: branch.name,
+        });
+    };
+
+    const confirmDelete = async () => {
+        const { branchId, type } = deleteConfirmation;
+        // Close immediately
+        setDeleteConfirmation((prev) => ({ ...prev, isOpen: false }));
+
         try {
-            // Find parent before deleting to switch to it
-            const branchToDelete = currentTreeBranches.find(b => b.id === branchId);
-            const parentId = branchToDelete?.parentBranchId;
-            
-            await deleteBranch(branchId);
-            
-            // Reload tree
-            if (currentConversationId) {
-                await handleSelectConversation(currentConversationId);
-                
-                // If we deleted the active branch, switch to parent or root
-                if (currentBranchId === branchId) {
-                    if (parentId) {
-                        await handleSelectBranch(parentId);
+            if (type === "conversation") {
+                await deleteBranch(branchId);
+                // Update local state
+                const newConversations = conversations.filter(c => c.id !== branchId);
+                setConversations(newConversations);
+
+                if (currentConversationId === branchId) {
+                    if (newConversations.length > 0) {
+                        await handleSelectConversation(newConversations[0].id);
                     } else {
-                        // This shouldn't happen for handleDeleteBranch on non-root, 
-                        // but if it does, fallback to root of conversation
-                        await handleSelectBranch(currentConversationId);
+                        await handleNewChat();
+                    }
+                }
+            } else {
+                // Find parent before deleting
+                const branchToDelete = currentTreeBranches.find(b => b.id === branchId);
+                const parentId = branchToDelete?.parentBranchId;
+
+                await deleteBranch(branchId);
+
+                if (currentConversationId) {
+                    await handleSelectConversation(currentConversationId);
+                    if (currentBranchId === branchId) {
+                        if (parentId) {
+                            await handleSelectBranch(parentId);
+                        } else {
+                            await handleSelectBranch(currentConversationId);
+                        }
                     }
                 }
             }
         } catch (error) {
-            console.error("Failed to delete branch:", error);
+            console.error("Failed to delete:", error);
+            alert("Failed to delete. Please try again.");
         }
     };
 
@@ -626,9 +783,37 @@ export default function ChatPage() {
                 currentBranchId={currentBranchId}
                 onSelectBranch={handleSelectBranch}
                 onDeleteBranch={handleDeleteBranch}
+                onMergeBranch={handleMergeBranch}
                 isCollapsed={gitTreeCollapsed}
                 onToggleCollapse={() => setGitTreeCollapsed(!gitTreeCollapsed)}
             />
+
+            <Dialog open={deleteConfirmation.isOpen} onOpenChange={(open) => setDeleteConfirmation(prev => ({ ...prev, isOpen: open }))}>
+                <DialogContent className="bg-black border-zinc-800 text-white">
+                    <DialogHeader>
+                        <DialogTitle>Delete {deleteConfirmation.type === "branch" ? "Branch" : "Chat"}</DialogTitle>
+                        <DialogDescription className="text-zinc-400">
+                            Are you sure you want to delete "{deleteConfirmation.name}"? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
+                            className="bg-zinc-900 text-white hover:bg-zinc-800"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Delete
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

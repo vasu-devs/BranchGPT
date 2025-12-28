@@ -3,6 +3,8 @@
 import { db, messages, branches, type Message, type NewMessage, type NewBranch } from "@/db";
 import { eq, and, isNull } from "drizzle-orm";
 import { v4 as uuidv4 } from "uuid";
+import { generateText } from "ai";
+import { groq } from "@ai-sdk/groq";
 
 /**
  * Recursively fetches the conversation history from a node back to root.
@@ -183,15 +185,15 @@ export async function getBranchTree(rootBranchId: string) {
     // Given the depth isn't massive yet, fetching all branches and filtering
     // by connectivity in JS/application layer is safest/easiest without CTEs.
     // OR: we fetch all branches and reconstruct the tree.
-    
+
     // For now, let's fetch ALL branches and we will filter in component or here.
     // Actually, let's fetch all branches and filter for those descending from rootBranchId.
-    
+
     // To do this efficiently without CTEs is hard in one query.
     // Let's just return ALL branches for now and let the frontend filter,
     // which is what getAllBranches did.
     // BUT we need to optimize this.
-    
+
     return db.query.branches.findMany({
         orderBy: (branches, { asc }) => [asc(branches.createdAt)],
     });
@@ -251,28 +253,94 @@ export async function formatHistoryForLLM(
  * Delete a branch and its messages
  */
 export async function deleteBranch(branchId: string): Promise<void> {
-    // Due to CASCADE on foreign keys, deleting the branch should delete messages
-    // BUT we should also delete child branches recursively if we want a full clean up
-    // However, the schema definition:
-    // branchId: uuid("branch_id").references(() => branches.id, { onDelete: "cascade" })
-    // This handles messages.
-    // 
-    // For child branches:
-    // We don't have explicit cascade in schema definition in this file for `branches` self-reference?
-    // Let's check schema.ts. If not, we might orphan them.
-    // 
-    // Safest approach is to find all children and delete them recursively first.
-    
     // 1. Find children
     const children = await db.query.branches.findMany({
         where: eq(branches.parentBranchId, branchId)
     });
-    
+
     // 2. Delete children recursively
     for (const child of children) {
         await deleteBranch(child.id);
     }
-    
+
     // 3. Delete this branch
     await db.delete(branches).where(eq(branches.id, branchId));
+}
+
+/**
+ * Generate a concise title for a branch based on the first message
+ */
+export async function generateBranchTitle(content: string): Promise<string> {
+    try {
+        const { text } = await generateText({
+            model: groq("llama-3.3-70b-versatile"),
+            system: "You are a helpful assistant. Generate a concise (3-5 words) title for a conversation branch starting with the following user message. Do not use quotes.",
+            prompt: content,
+        });
+        return text.trim();
+    } catch (error) {
+        console.error("Failed to generate branch title:", error);
+        return "New Branch";
+    }
+}
+
+/**
+ * Update the name of a branch
+ */
+export async function updateBranchName(branchId: string, name: string): Promise<void> {
+    await db.update(branches).set({ name }).where(eq(branches.id, branchId));
+}
+
+/**
+ * Merge a branch back into its parent
+ * Appends a transcript of the branch to the parent and marks it as merged.
+ */
+export async function mergeBranch(branchId: string): Promise<string> {
+    // 1. Get branch details
+    const branch = await db.query.branches.findFirst({
+        where: eq(branches.id, branchId),
+    });
+
+    if (!branch || !branch.parentBranchId) {
+        throw new Error("Cannot merge: Branch not found or is a root branch");
+    }
+
+    // 2. Get history
+    const { history, branchName } = await prepareMergeContext(branchId);
+    
+    // 3. Format transcript
+    const transcript = history.map(msg => `**${msg.role.toUpperCase()}**: ${msg.content}`).join("\n\n");
+    const mergeContent = `Has merged branch "**${branchName}**".\n\n### Transcript:\n${transcript}`;
+
+    // 4. Create new message in parent branch
+    // Check if parent has a head, we might need to append to it. 
+    // Actually createMessage handles attaching to parentId if provided, but here we are appending to the *end* of the parent branch.
+    // We need the head of the parent branch to be the parent of this new message.
+    
+    const parentHead = await getBranchHead(branch.parentBranchId);
+    
+    // If parent has no messages (unlikely if it's a parent), use parent's root? 
+    // If parent head is null, it means its empty or verified elsewhere.
+    
+    let parentMessageId = parentHead ? parentHead.id : branch.rootMessageId; 
+    // Fallback to rootMessageId is risky if rootMessageId belongs to grand-parent. 
+    // But if parentBranchId exists, there must be a path.
+    
+    if (!parentMessageId) {
+         // Fallback if truly nothing found (shouldn't happen for valid fork)
+         throw new Error("Could not find insertion point in parent branch");
+    }
+
+    await createMessage({
+        content: mergeContent,
+        role: "system", // System message to denote merge event
+        parentId: parentMessageId,
+        branchId: branch.parentBranchId,
+        isHead: true,
+    });
+
+    // 5. Mark as merged
+    await db.update(branches).set({ isMerged: true }).where(eq(branches.id, branchId));
+
+    return branch.parentBranchId;
 }

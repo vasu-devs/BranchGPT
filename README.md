@@ -19,7 +19,7 @@ Standard chat apps are linear linked lists. BranchGPT is a **Directed Acyclic Gr
 npm install
 
 # Set up environment variables
-cp env.example .env.local
+cp env.example .env
 
 # Start development server
 npm run dev
@@ -40,10 +40,11 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## 🔧 Environment Variables
 
-Create a `.env.local` file:
+Create a `.env` file:
 
 ```env
 DATABASE_URL=postgresql://user:pass@host.neon.tech/neondb?sslmode=require
+GROQ_API_KEY=gsk_your_key_here
 GROQ_API_KEY=gsk_your-groq-api-key
 ```
 

@@ -10,6 +10,7 @@ export const branches = pgTable("branches", {
     name: text("name").notNull().default("main"),
     rootMessageId: uuid("root_message_id"), // The message where this branch diverges (null for main)
     parentBranchId: uuid("parent_branch_id"), // The branch this was forked from
+    isMerged: boolean("is_merged").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

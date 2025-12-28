@@ -21,6 +21,7 @@ interface GitTreeProps {
     currentBranchId: string | null;
     onSelectBranch: (branchId: string) => void;
     onDeleteBranch: (branchId: string) => void;
+    onMergeBranch?: (branchId: string) => void;
     isCollapsed?: boolean;
     onToggleCollapse?: () => void;
 }
@@ -30,6 +31,7 @@ export function GitTree({
     currentBranchId,
     onSelectBranch,
     onDeleteBranch,
+    onMergeBranch,
     isCollapsed = false,
     onToggleCollapse,
 }: GitTreeProps) {
@@ -135,6 +137,7 @@ export function GitTree({
                                                     currentBranchId={currentBranchId}
                                                     onSelectBranch={onSelectBranch}
                                                     onDeleteBranch={onDeleteBranch}
+                                                    onMergeBranch={onMergeBranch}
                                                     depth={1}
                                                 />
                                             ))}
@@ -169,18 +172,21 @@ function BranchNode({
     currentBranchId,
     onSelectBranch,
     onDeleteBranch,
+    onMergeBranch,
     depth,
 }: {
-    branch: { id: string; name: string; parentBranchId: string | null; messageCount?: number };
-    allBranches: { id: string; name: string; parentBranchId: string | null }[];
+    branch: { id: string; name: string; parentBranchId: string | null; messageCount?: number; isMerged?: boolean };
+    allBranches: { id: string; name: string; parentBranchId: string | null; isMerged?: boolean }[];
     currentBranchId: string | null;
     onSelectBranch: (id: string) => void;
     onDeleteBranch: (id: string) => void;
+    onMergeBranch?: (id: string) => void;
     depth: number;
 }) {
     const childBranches = allBranches.filter((b) => b.parentBranchId === branch.id);
     const branchLabel = branch.name.startsWith("Branch ") ? `#${branch.name.slice(-6)}` : branch.name;
     const isMain = branch.name === "main";
+    const isActive = currentBranchId === branch.id;
 
     return (
         <div>
@@ -192,28 +198,44 @@ function BranchNode({
                         onClick={() => onSelectBranch(branch.id)}
                         className={cn(
                             "flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-sm border",
-                            currentBranchId === branch.id
+                            isActive
                                 ? "bg-zinc-900 border-zinc-800 text-white"
                                 : "hover:bg-zinc-900/50 border-transparent text-zinc-400 hover:text-zinc-300"
                         )}
                     >
-                        <GitBranch className="h-3.5 w-3.5 opacity-70" />
-                        <span className="font-mono truncate text-xs">{branchLabel}</span>
+                        <GitBranch className={cn("h-3.5 w-3.5", branch.isMerged ? "text-purple-400" : "opacity-70")} />
+                        <span className={cn("font-mono truncate text-xs", branch.isMerged && "text-zinc-500 line-through")}>
+                            {branchLabel}
+                        </span>
                     </button>
 
-                    {/* Delete Option */}
+                    {/* Options (Delete / Merge) */}
                     {!isMain && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-red-400 hover:bg-zinc-900"
+                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-white hover:bg-zinc-900"
                                 >
                                     <MoreHorizontal className="h-3.5 w-3.5" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-black border-zinc-800">
+                            <DropdownMenuContent align="end" className="bg-black border-zinc-800 min-w-[150px]">
+                                {onMergeBranch && !branch.isMerged && branch.parentBranchId && (
+                                    <DropdownMenuItem 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onMergeBranch(branch.id);
+                                        }}
+                                        disabled={!isActive} // "only be available in the latest branch" - interpreted as Active? Or just leaf? 
+                                        // User said "only be available in the latest branch" -> might mean they must be ON it.
+                                        className="text-purple-400 focus:text-purple-300 focus:bg-zinc-900 cursor-pointer text-xs"
+                                    >
+                                        <GitCommit className="mr-2 h-3.5 w-3.5" />
+                                        Merge into Parent
+                                    </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem 
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -241,6 +263,7 @@ function BranchNode({
                             currentBranchId={currentBranchId}
                             onSelectBranch={onSelectBranch}
                             onDeleteBranch={onDeleteBranch}
+                            onMergeBranch={onMergeBranch}
                             depth={depth + 1}
                         />
                     ))}
