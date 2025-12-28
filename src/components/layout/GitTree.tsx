@@ -1,14 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { GitBranch, GitCommit, PanelRightClose, PanelRight, Trash2, MoreHorizontal } from "lucide-react";
+import { GitBranch, GitCommit, PanelRightClose, PanelRight, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface GitTreeProps {
     branches: {
@@ -69,7 +63,7 @@ export function GitTree({
     }
 
     return (
-        <div className="w-64 h-full bg-zinc-50 dark:bg-black border-l border-zinc-200 dark:border-zinc-900 flex flex-col">
+        <div className="w-[300px] h-full bg-zinc-50 dark:bg-black border-l border-zinc-200 dark:border-zinc-900 flex flex-col">
             {/* Header */}
             <div className="h-16 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-900">
                 <div className="flex items-center gap-2">
@@ -211,43 +205,36 @@ function BranchNode({
 
                     {/* Options (Delete / Merge) */}
                     {!isMain && (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                                >
-                                    <MoreHorizontal className="h-3.5 w-3.5" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 min-w-[150px]">
-                                {onMergeBranch && !branch.isMerged && branch.parentBranchId && (
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onMergeBranch(branch.id);
-                                        }}
-                                        disabled={!isActive} // "only be available in the latest branch" - interpreted as Active? Or just leaf? 
-                                        // User said "only be available in the latest branch" -> might mean they must be ON it.
-                                        className="text-purple-400 focus:text-purple-300 focus:bg-zinc-900 cursor-pointer text-xs"
-                                    >
-                                        <GitCommit className="mr-2 h-3.5 w-3.5" />
-                                        Merge into Parent
-                                    </DropdownMenuItem>
-                                )}
-                                <DropdownMenuItem
+                        <div className="flex items-center gap-0.5 ml-1 shrink-0">
+                            {onMergeBranch && !branch.isMerged && branch.parentBranchId && (
+                                <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onDeleteBranch(branch.id);
+                                        onMergeBranch(branch.id);
                                     }}
-                                    className="text-red-500 focus:text-red-400 focus:bg-zinc-900 cursor-pointer text-xs"
+                                    disabled={!isActive}
+                                    title="Merge into Parent"
+                                    className={cn(
+                                        "h-6 w-6 flex items-center justify-center rounded-md transition-colors",
+                                        isActive
+                                            ? "text-purple-500 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                            : "text-zinc-300 cursor-not-allowed"
+                                    )}
                                 >
-                                    <Trash2 className="mr-2 h-3.5 w-3.5" />
-                                    Delete Branch
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                    <GitCommit className="h-3.5 w-3.5" />
+                                </button>
+                            )}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDeleteBranch(branch.id);
+                                }}
+                                title="Delete Branch"
+                                className="h-6 w-6 flex items-center justify-center rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>

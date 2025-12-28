@@ -26,6 +26,13 @@ export function ChatInput({
         }
     }, [input]);
 
+    // Auto-focus when re-enabled (after AI finishes)
+    useEffect(() => {
+        if (!disabled && textareaRef.current) {
+            textareaRef.current.focus();
+        }
+    }, [disabled]);
+
     const handleSubmit = (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!input.trim() || disabled) return;
