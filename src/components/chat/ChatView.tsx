@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { GitBranch } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface MessageWithMeta extends Message {
     siblingCount: number;
@@ -168,9 +170,11 @@ export function ChatView({
                     {forkSourceContent && (
                         <div className="rounded-xl bg-zinc-100 dark:bg-zinc-800 p-4">
                             <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2 font-medium">Original</p>
-                            <p className="text-base text-zinc-700 dark:text-zinc-300 line-clamp-3">
-                                {forkSourceContent}
-                            </p>
+                            <div className="text-base text-zinc-700 dark:text-zinc-300 line-clamp-3 prose prose-xs prose-neutral dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {forkSourceContent}
+                                </ReactMarkdown>
+                            </div>
                         </div>
                     )}
 

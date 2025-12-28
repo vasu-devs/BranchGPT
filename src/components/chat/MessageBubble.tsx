@@ -66,7 +66,11 @@ export function MessageBubble({
             >
                 <div className="max-w-[75%]">
                     <div className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 px-5 py-3 rounded-3xl rounded-br-sm shadow-md bg-gradient-to-br from-zinc-900 to-zinc-700 dark:from-white dark:to-zinc-200">
-                        <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <div className="prose prose-xs prose-invert dark:prose-neutral max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {message.content}
+                            </ReactMarkdown>
+                        </div>
                     </div>
                     {/* Actions - visible on hover */}
                     <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -134,9 +138,11 @@ export function MessageBubble({
                 <div className="prose prose-zinc dark:prose-invert max-w-none">
                     {message.role === "system" && message.content.includes("### Transcript:") ? (
                         <div className="flex flex-col gap-2">
-                            <p className="text-amber-800 dark:text-amber-200 font-medium italic">
-                                {message.content.split("\n\n### Transcript:\n")[0]}
-                            </p>
+                            <div className="text-amber-800 dark:text-amber-200 font-medium italic prose prose-xs prose-zinc dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_strong]:text-amber-900 dark:[&_strong]:text-amber-100">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {message.content.split("\n\n### Transcript:\n")[0]}
+                                </ReactMarkdown>
+                            </div>
                             <CollapsibleTranscript content={message.content.split("\n\n### Transcript:\n")[1]} />
                         </div>
                     ) : (
