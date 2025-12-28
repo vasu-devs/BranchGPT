@@ -78,7 +78,7 @@ export async function createMessage(
             .where(and(eq(messages.branchId, data.branchId), eq(messages.isHead, true)));
     } else {
         // If no parent (root message), ensure no other heads exist ensuring single head safety
-         await db
+        await db
             .update(messages)
             .set({ isHead: false })
             .where(and(eq(messages.branchId, data.branchId), eq(messages.isHead, true)));
@@ -251,7 +251,21 @@ export async function prepareMergeContext(branchId: string): Promise<{
 
     const history = await getConversationHistory(head.id);
 
-    return { history, branchName: branch.name };
+    // Filter history to only include messages that belong to this branch
+    // The branch.rootMessageId is the message we forked FROM (belonging to parent).
+    // So we want everything *after* rootMessageId.
+    // However, if the branch is a root branch (no parent), we take everything.
+
+    let filteredHistory = history;
+    if (branch.rootMessageId) {
+        const rootIndex = history.findIndex(m => m.id === branch.rootMessageId);
+        if (rootIndex !== -1) {
+            // slice(rootIndex + 1) takes everything AFTER the root message
+            filteredHistory = history.slice(rootIndex + 1);
+        }
+    }
+
+    return { history: filteredHistory, branchName: branch.name };
 }
 
 /**
