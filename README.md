@@ -1,86 +1,107 @@
 # 🌳 BranchGPT
 
-> A Git-like chat interface where conversations are trees, not lists.
+> **"Conversations are trees, not lists."**
 
-Standard chat apps are linear linked lists. BranchGPT is a **Directed Acyclic Graph**. Fork conversations at any message to explore different directions without polluting your main context.
+BranchGPT reimplements the chat interface as a **Directed Acyclic Graph (DAG)**. Unlike standard linear chatbots, BranchGPT allows you to **fork** any message into a new branch, explore parallel ideas, and **merge** valuable insights back into the main thread—just like Git, but for thinking.
 
-## ✨ Features
+![BranchGPT Demo](https://placehold.co/1200x600/18181b/white?text=BranchGPT+Preview)
 
-- **🔀 Fork Any Message** – Click "Fork" on any message to create a new branch
-- **🧭 Branch Navigation** – Navigate between parallel conversation branches  
-- **🌊 AI Streaming** – Real-time response streaming with OpenAI
-- **🌙 Dark Mode** – Beautiful dark UI by default
-- **🗄️ Persistent History** – PostgreSQL-backed conversation storage
+## ✨ Key Features
 
-## 🚀 Quick Start
+### 🌿 True Branching Logic
+- **Fork Anywhere**: Click the "Fork" button on *any* message to spawn a parallel reality.
+- **Tree Navigation**: A visual sidebar tree lets you jump between timeline branches instantly.
+- **Context Preservation**: Each branch maintains its own unique history up to the fork point.
 
-```bash
-# Install dependencies
-npm install
+### 🧠 Smart Merging
+- **Concise Summaries**: When merging a branch back into its parent, the system generates a summarized transcript.
+- **Context Awareness**: The merge logic intelligently filters out shared history, adding *only* the new messages from the branch to avoid duplication.
+- **System Events**: Merges are recorded as distinct system events in the chat stream.
 
-# Set up environment variables
-cp env.example .env
-
-# Start development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000)
+### ⚡️ Optimized UX
+- **Auto-Focus Flow**: The input field automatically grabs focus after AI responses, allowing for seamless, keyboard-only conversation flow.
+- **Markdown Everywhere**: Full support for Rich Text, Code Blocks, and Mathematical Notation (LaTeX) in all messages—user, AI, and system.
+- **Adaptive Interface**: A responsive, 300px-wide sidebar that balances visibility with screen real estate.
 
 ## 📦 Tech Stack
 
+Built with a modern, type-safe stack designed for performance and reliability.
+
 | Layer | Technology |
 |-------|------------|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript |
-| Database | PostgreSQL (Neon/Supabase) |
-| ORM | Drizzle ORM |
-| UI | Tailwind CSS + Shadcn UI |
-| AI | Vercel AI SDK + Groq (Llama 3.3) |
+| **Framework** | [Next.js 16](https://nextjs.org/) (App Router & Server Actions) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Database** | [PostgreSQL](https://neon.tech/) (via Neon Serverless) |
+| **ORM** | [Drizzle ORM](https://orm.drizzle.team/) |
+| **AI Engine** | [Vercel AI SDK](https://sdk.vercel.ai/) + [Groq](https://groq.com/) (Llama 3.3) |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/) |
 
-## 🔧 Environment Variables
+## 🚀 Getting Started
 
-Create a `.env` file:
+### Prerequisites
+- Node.js 20+
+- A [Neon](https://neon.tech) PostgreSQL database
+- A [Groq](https://console.groq.com/) API Key
 
-```env
-DATABASE_URL=postgresql://user:pass@host.neon.tech/neondb?sslmode=require
-GROQ_API_KEY=gsk_your_key_here
-GROQ_API_KEY=gsk_your-groq-api-key
-```
+### Installation
 
-## 🗃️ Database Setup
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/yourusername/branchgpt.git
+    cd branchgpt
+    ```
 
-```bash
-# Push schema to database
-npx drizzle-kit push
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
 
-# Or generate migrations
-npx drizzle-kit generate
-npx drizzle-kit migrate
-```
+3.  **Configure Environment**
+    Create a `.env` file in the root directory:
+    ```env
+    # Database (Neon/Postgres)
+    DATABASE_URL="postgresql://user:pass@ep-xyz.region.aws.neon.tech/neondb?sslmode=require"
 
-## 📁 Project Structure
+    # AI Provider
+    GROQ_API_KEY="gsk_your_groq_api_key"
+    ```
 
-```
-src/
-├── app/                # Next.js App Router
-├── components/chat/    # Chat UI components
-├── db/                 # Drizzle schema & connection
-├── actions/            # Server actions (tree traversal)
-└── lib/               # Utilities
-```
+4.  **Initialize Database**
+    Push the schema to your database:
+    ```bash
+    npx drizzle-kit push
+    ```
 
-## 🎯 Key Concepts
+5.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+    Visit [http://localhost:3000](http://localhost:3000) to start chatting.
 
-### Tree Structure
-Messages form a tree via `parentId` references. Each message points to its parent, enabling:
-- Recursive history traversal
-- Multiple children (branches) per message
-- Sibling navigation
+## 📖 Usage Guide
 
-### Context Building
-`getConversationHistory(nodeId)` walks up the tree to root, then reverses for chronological LLM context.
+### Forking a Conversation
+1.  Hover over any message in the chat.
+2.  Click the **Fork Icon** (Git Branch symbol).
+3.  Enter a new prompt to steer the conversation in a new direction.
+4.  You are now in a new branch!
+
+### Merging a Branch
+1.  Navigate to the branch you want to merge (must be a child branch).
+2.  Click the **Merge Icon** (Purple Git Commit symbol) in the sidebar.
+3.  Confirm the action. The branch's transcript will be appended to the parent branch.
+
+### Deleting a Branch
+1.  Click the **Trash Icon** next to any branch in the sidebar.
+2.  **Warning**: This cascades and creates all sub-branches born from it.
+
+## 🗃️ Database Schema
+
+The core data model revolves around two tables:
+
+- **`branches`**: Represents a timeline. Stores `parentBranchId` and `rootMessageId` to define the graph structure.
+- **`messages`**: Linked list of chat nodes. Stores `parentId` to allow recursive history traversal.
 
 ## 📄 License
 
-MIT
+MIT © [Project Owner]
