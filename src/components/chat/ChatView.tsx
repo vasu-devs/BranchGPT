@@ -14,7 +14,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { GitBranch } from "lucide-react";
+import { BranchIcon } from "@/components/icons/BranchIcon";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -85,7 +85,7 @@ export function ChatView({
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
                             <div className="w-16 h-16 rounded-2xl bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center mb-6 backdrop-blur-sm">
-                                <GitBranch className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
+                                <BranchIcon className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
                             </div>
                             <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-3">
                                 Start a conversation
@@ -159,7 +159,7 @@ export function ChatView({
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
-                            <GitBranch className="h-5 w-5" />
+                            <BranchIcon className="h-5 w-5" />
                             Create Branch
                         </DialogTitle>
                         <DialogDescription className="text-base">
