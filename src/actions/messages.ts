@@ -12,22 +12,33 @@ import { cookies } from "next/headers";
  * Returns messages in chronological order [Root -> ... -> Node]
  */
 export async function getConversationHistory(nodeId: string): Promise<Message[]> {
-    const history: Message[] = [];
-    let currentId: string | null = nodeId;
+    // Optimized: Use Recursive CTE to fetch entire lineage in one query
+    const result = await db.execute(sql`
+        WITH RECURSIVE chain AS (
+            SELECT *
+            FROM messages
+            WHERE id = ${nodeId}
+            
+            UNION ALL
+            
+            SELECT m.*
+            FROM messages m
+            INNER JOIN chain c ON m.id = c.parent_id
+        )
+        SELECT * FROM chain ORDER BY created_at ASC;
+    `);
 
-    // Traverse up the tree collecting messages
-    while (currentId) {
-        const message: Message | undefined = await db.query.messages.findFirst({
-            where: eq(messages.id, currentId),
-        });
-
-        if (!message) break;
-
-        history.unshift(message); // Add to beginning for chronological order
-        currentId = message.parentId;
-    }
-
-    return history;
+    // Map raw query results (snake_case) to application type (camelCase)
+    // Drizzle's execute returns raw row data via .rows property
+    return result.rows.map((row: any) => ({
+        id: row.id,
+        content: row.content,
+        role: row.role,
+        parentId: row.parent_id,
+        branchId: row.branch_id,
+        isHead: row.is_head,
+        createdAt: new Date(row.created_at),
+    }));
 }
 
 /**
