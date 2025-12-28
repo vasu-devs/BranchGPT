@@ -15,6 +15,8 @@ interface MessageBubbleProps {
     isStreaming?: boolean;
 }
 
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { motion } from "framer-motion";
 
 function CollapsibleTranscript({ content }: { content: string }) {
@@ -33,7 +35,11 @@ function CollapsibleTranscript({ content }: { content: string }) {
             </button>
             {isOpen && (
                 <div className="p-3 pt-0 text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-50/50 dark:bg-zinc-900/10 border-t border-zinc-100 dark:border-zinc-800/50">
-                    <div className="whitespace-pre-wrap font-mono mt-2">{content}</div>
+                    <div className="prose prose-xs prose-zinc dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {content}
+                        </ReactMarkdown>
+                    </div>
                 </div>
             )}
         </div>
@@ -134,15 +140,17 @@ export function MessageBubble({
                             <CollapsibleTranscript content={message.content.split("\n\n### Transcript:\n")[1]} />
                         </div>
                     ) : (
-                        <p className={cn(
-                            "text-[15px] leading-relaxed whitespace-pre-wrap",
+                        <div className={cn(
+                            "text-[15px] leading-relaxed",
                             message.role === "system" ? "text-amber-800 dark:text-amber-200 italic" : "text-foreground"
                         )}>
-                            {message.content}
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {message.content}
+                            </ReactMarkdown>
                             {isStreaming && (
                                 <span className="inline-block w-2 h-5 ml-1 bg-foreground animate-pulse rounded-sm" />
                             )}
-                        </p>
+                        </div>
                     )}
                 </div>
                 {/* Actions */}
