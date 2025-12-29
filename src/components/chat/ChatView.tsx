@@ -156,7 +156,7 @@ export function ChatView({
 
             {/* Fork Dialog */}
             <Dialog open={forkModalOpen} onOpenChange={setForkModalOpen}>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
                             <BranchIcon className="h-5 w-5" />
@@ -167,27 +167,29 @@ export function ChatView({
                         </DialogDescription>
                     </DialogHeader>
 
-                    {forkSourceContent && (
-                        <div className="rounded-xl bg-zinc-100 dark:bg-zinc-800 p-4">
-                            <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2 font-medium">Original</p>
-                            <div className="text-base text-zinc-700 dark:text-zinc-300 line-clamp-3 prose prose-xs prose-neutral dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                    {forkSourceContent}
-                                </ReactMarkdown>
+                    <div className="flex-1 overflow-y-auto min-h-0 space-y-4">
+                        {forkSourceContent && (
+                            <div className="rounded-xl bg-zinc-100 dark:bg-zinc-800 p-4">
+                                <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2 font-medium">Original</p>
+                                <div className="text-base text-zinc-700 dark:text-zinc-300 prose prose-xs prose-neutral dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                        {forkSourceContent}
+                                    </ReactMarkdown>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    <div className="space-y-2">
-                        <label className="text-base font-medium">Your new message</label>
-                        <Textarea
-                            placeholder="What would you like to say instead?"
-                            value={forkContent}
-                            onChange={(e) => setForkContent(e.target.value)}
-                            rows={3}
-                            className="resize-none text-base"
-                            autoFocus
-                        />
+                        <div className="space-y-2">
+                            <label className="text-base font-medium">Your new message</label>
+                            <Textarea
+                                placeholder="What would you like to say instead?"
+                                value={forkContent}
+                                onChange={(e) => setForkContent(e.target.value)}
+                                rows={3}
+                                className="resize-none text-base"
+                                autoFocus
+                            />
+                        </div>
                     </div>
 
                     <DialogFooter>
