@@ -390,8 +390,31 @@ export async function mergeBranch(branchId: string): Promise<string> {
     const { history, branchName } = await prepareMergeContext(branchId);
 
     // 3. Format transcript
-    const transcript = history.map(msg => `**${msg.role.toUpperCase()}**: ${msg.content}`).join("\n\n");
-    const mergeContent = `Has merged branch "**${branchName}**".\n\n### Transcript:\n${transcript}`;
+    // 3. Generate Summary using LLM
+    const transcript = history.map(msg => `${msg.role.toUpperCase()}: ${msg.content}`).join("\n\n");
+    
+    let summary = "";
+    try {
+        const { text } = await generateText({
+            model: groq("llama-3.3-70b-versatile"),
+            system: `You are an expert technical project manager and software architect. 
+Your task is to summarize the key developments from a conversation branch that is being merged back into the main project.
+Focus on:
+- Key decisions made
+- Code changes or features implemented
+- Important conclusions reached
+- Any outstanding tasks or notes
+
+Format the output as a concise markdown summary. Do not use conversational filler. Start directly with the summary.`,
+            prompt: `Branch Name: ${branchName}\n\nConversation Transcript:\n${transcript}`,
+        });
+        summary = text;
+    } catch (error) {
+        console.error("Failed to generate merge summary:", error);
+        summary = `Merged branch "**${branchName}**". (Summary generation failed)`;
+    }
+
+    const mergeContent = `### 🔀 Merged Branch: ${branchName}\n\n${summary}`;
 
     // 4. Create new message in parent branch
     // Check if parent has a head, we might need to append to it. 
