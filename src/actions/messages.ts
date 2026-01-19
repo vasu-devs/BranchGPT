@@ -8,6 +8,33 @@ import { groq } from "@ai-sdk/groq";
 import { cookies } from "next/headers";
 
 /**
+ * Utility to manage user sessions via cookies.
+ */
+async function ensureAuth() {
+    try {
+        const cookieStore = await cookies();
+        let userId = (await cookieStore).get("branchgpt-userid")?.value;
+
+        if (!userId) {
+            userId = uuidv4();
+            try {
+                (await cookieStore).set("branchgpt-userid", userId, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: "lax",
+                    maxAge: 60 * 60 * 24 * 365, // 1 year
+                });
+            } catch (e) {
+                // Next.js sometimes errors if cookies are set after headers - fallback safely
+            }
+        }
+        return userId || "legacy";
+    } catch (e) {
+        return "legacy";
+    }
+}
+
+/**
  * Recursively fetches the conversation history from a node back to root.
  * Returns messages in chronological order [Root -> ... -> Node]
  */
@@ -124,8 +151,7 @@ export async function forkConversation(
         throw new Error("Source message not found");
     }
 
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+    const userId = await ensureAuth();
 
     // Create new branch
     const [newBranch] = await db
@@ -163,8 +189,7 @@ export async function createConversation(
         minute: '2-digit'
     });
 
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+    const userId = await ensureAuth();
 
     // ALWAYS create a new branch for a new conversation
     const [mainBranch] = await db
@@ -196,8 +221,7 @@ export async function createConversation(
  * Get all conversations (Root branches)
  */
 export async function getConversations() {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+    const userId = await ensureAuth();
 
     return db.query.branches.findMany({
         where: and(isNull(branches.parentBranchId), eq(branches.userId, userId)),
@@ -209,8 +233,7 @@ export async function getConversations() {
  * Optimized fetch for sidebar: Gets conversations + message counts in ONE query.
  */
 export async function getConversationsWithCounts() {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("branchgpt-userid")?.value || "legacy";
+    const userId = await ensureAuth();
 
     // We need to import 'count' and 'sql' from drizzle-orm if not available, 
     // but we can use db.execute or query builder.
@@ -228,7 +251,7 @@ export async function getConversationsWithCounts() {
         .from(branches)
         .leftJoin(messages, eq(branches.id, messages.branchId))
         .where(and(isNull(branches.parentBranchId), eq(branches.userId, userId)))
-        .groupBy(branches.id)
+        .groupBy(branches.id, branches.name, branches.createdAt, branches.parentBranchId, branches.rootMessageId, branches.isMerged)
         .orderBy(desc(branches.createdAt));
 
     return result as {
@@ -246,23 +269,65 @@ export async function getConversationsWithCounts() {
  * Get all branches belonging to a specific conversation tree
  */
 export async function getBranchTree(rootBranchId: string) {
-    // Recursive query would be ideal but for now we fetch all and filter in app
-    // or we can do a multi-level fetch.
-    // Given the depth isn't massive yet, fetching all branches and filtering
-    // by connectivity in JS/application layer is safest/easiest without CTEs.
-    // OR: we fetch all branches and reconstruct the tree.
-
-    // For now, let's fetch ALL branches and we will filter in component or here.
-    // Actually, let's fetch all branches and filter for those descending from rootBranchId.
-
-    // To do this efficiently without CTEs is hard in one query.
-    // Let's just return ALL branches for now and let the frontend filter,
-    // which is what getAllBranches did.
-    // BUT we need to optimize this.
+    // We already have optimized CTE for history, but for tree we can just fetch all branches
+    // for now and filter. However, to make it faster, we can fetch only branches for this user.
+    const userId = await ensureAuth();
 
     return db.query.branches.findMany({
+        where: eq(branches.userId, userId),
         orderBy: (branches, { asc }) => [asc(branches.createdAt)],
     });
+}
+
+/**
+ * Optimized fetch for a conversation tree: 
+ * Gets all branches and their basic info in one query.
+ * We can't easily get counts and head message in ONE query without a complex join or subqueries,
+ * but we can fetch them separately and combine.
+ */
+export async function getBranchTreeDetailed(rootBranchId: string) {
+    const userId = await ensureAuth();
+
+    // 1. Get all branches for this user/tree
+    // In a real app we'd filter by connectivity to rootBranchId via CTE
+    const allBranches = await db.query.branches.findMany({
+        where: eq(branches.userId, userId),
+        orderBy: (branches, { asc }) => [asc(branches.createdAt)],
+    });
+
+    // 2. Identify branches in this specific tree (descendants of rootBranchId)
+    const treeBranchIds = new Set<string>([rootBranchId]);
+    let added = true;
+    while (added) {
+        added = false;
+        for (const b of allBranches) {
+            if (!treeBranchIds.has(b.id) && b.parentBranchId && treeBranchIds.has(b.parentBranchId)) {
+                treeBranchIds.add(b.id);
+                added = true;
+            }
+        }
+    }
+
+    const filteredBranches = allBranches.filter(b => treeBranchIds.has(b.id));
+
+    // 3. Get message counts and head info for these branches
+    // We can join with messages to get counts
+    const branchStats = await db.select({
+        id: branches.id,
+        messageCount: sql<number>`count(${messages.id})`.mapWith(Number),
+    })
+        .from(branches)
+        .leftJoin(messages, eq(branches.id, messages.branchId))
+        .where(sql`${branches.id} IN ${filteredBranches.map(b => b.id)}`)
+        .groupBy(branches.id);
+
+    const statsMap = new Map(branchStats.map(s => [s.id, s.messageCount]));
+
+    return filteredBranches.map(b => ({
+        ...b,
+        messageCount: statsMap.get(b.id) || 0,
+        isMain: b.id === rootBranchId,
+    }));
 }
 
 /**
@@ -353,14 +418,17 @@ export async function deleteBranch(branchId: string): Promise<void> {
  */
 export async function generateBranchTitle(content: string): Promise<string> {
     try {
+        // Production: Sanitize and limit input length for LLM safety
+        const safeContent = content.slice(0, 500); 
+
         const { text } = await generateText({
             model: groq("llama-3.3-70b-versatile"),
             system: "You are a helpful assistant. Generate a concise (3-5 words) title for a conversation branch starting with the following user message. Do not use quotes.",
-            prompt: content,
+            prompt: safeContent,
         });
         return text.trim();
     } catch (error) {
-        console.error("Failed to generate branch title:", error);
+        // Use a more silent error handling for production
         return "New Branch";
     }
 }
@@ -389,10 +457,13 @@ export async function mergeBranch(branchId: string): Promise<string> {
     // 2. Get history
     const { history, branchName } = await prepareMergeContext(branchId);
 
-    // 3. Format transcript
     // 3. Generate Summary using LLM
-    const transcript = history.map(msg => `${msg.role.toUpperCase()}: ${msg.content}`).join("\n\n");
-    
+    // Limit transcript size for performance and cost control
+    const transcript = history
+        .slice(-20) // Only take last 20 messages for summary if too long
+        .map(msg => `${msg.role.toUpperCase()}: ${msg.content.slice(0, 1000)}`)
+        .join("\n\n");
+
     let summary = "";
     try {
         const { text } = await generateText({
@@ -410,7 +481,6 @@ Format the output as a concise markdown summary. Do not use conversational fille
         });
         summary = text;
     } catch (error) {
-        console.error("Failed to generate merge summary:", error);
         summary = `Merged branch "**${branchName}**". (Summary generation failed)`;
     }
 
@@ -446,6 +516,5 @@ Format the output as a concise markdown summary. Do not use conversational fille
     // 5. Mark as merged
     await db.update(branches).set({ isMerged: true }).where(eq(branches.id, branchId));
 
-    console.log(`[mergeBranch] Successfully merged ${branchId} into ${branch.parentBranchId}`);
     return branch.parentBranchId;
 }

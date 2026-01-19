@@ -1,4 +1,5 @@
 import { ThemeToggle } from "@/components/theme-toggle";
+import { HelpDialog } from "./HelpDialog";
 import { Button } from "@/components/ui/button";
 import { PanelCloseIcon } from "@/components/icons/PanelCloseIcon";
 import { PanelIcon } from "@/components/icons/PanelIcon";
@@ -180,7 +181,7 @@ export function Sidebar({
                 </div>
 
                 {/* User/Footer */}
-                <div className="p-4 border-t border-border/50">
+                <div className="p-4 border-t border-border/50 space-y-4">
                     <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
                         <div className="w-8 h-8 rounded-full bg-zinc-800 dark:bg-zinc-200 shrink-0" />
                         {!isCollapsed && (
@@ -189,8 +190,24 @@ export function Sidebar({
                                 <p className="text-xs text-muted-foreground truncate">Free Plan</p>
                             </div>
                         )}
-                        {!isCollapsed && <ThemeToggle />}
+                        <div className="flex items-center gap-1">
+                            {!isCollapsed && <HelpDialog />}
+                            {!isCollapsed && <ThemeToggle />}
+                        </div>
                     </div>
+                    {!isCollapsed && (
+                        <div className="px-1 pt-2">
+                            <a
+                                href="https://vasudev.live"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm font-semibold text-muted-foreground hover:text-foreground transition-all flex items-center gap-2 bg-zinc-100/80 dark:bg-zinc-900/80 px-4 py-2.5 rounded-xl border border-border/50 shadow-md backdrop-blur-md"
+                            >
+                                <span className="opacity-70">Made with ❤️ by</span>
+                                <span className="font-bold tracking-tight text-foreground">Vasu-DevS</span>
+                            </a>
+                        </div>
+                    )}
                 </div>
             </div>
         </motion.div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Message } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ function CollapsibleTranscript({ content }: { content: string }) {
     );
 }
 
-export function MessageBubble({
+export const MessageBubble = React.memo(function MessageBubble({
     message,
     siblingCount,
     currentSiblingIndex,
@@ -72,35 +72,35 @@ export function MessageBubble({
                             </ReactMarkdown>
                         </div>
                     </div>
-                    {/* Actions - visible on hover */}
-                    <div className="flex justify-end gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {/* Actions - visible on hover or always on mobile */}
+                    <div className="flex justify-end gap-1 mt-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
                         {siblingCount > 1 && (
-                            <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                            <div className="flex items-center gap-1 text-white/70 dark:text-zinc-500 text-xs">
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-6 w-6"
+                                    className="h-8 w-8 md:h-6 md:w-6 hover:bg-white/10 dark:hover:bg-black/10"
                                     onClick={() => onNavigateSibling(message.id, "prev")}
                                     disabled={currentSiblingIndex === 0}
                                 >
-                                    <ChevronLeft className="h-3.5 w-3.5" />
+                                    <ChevronLeft className="h-4 w-4 md:h-3.5 md:w-3.5" />
                                 </Button>
                                 <span className="font-mono">{currentSiblingIndex + 1}/{siblingCount}</span>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-6 w-6"
+                                    className="h-8 w-8 md:h-6 md:w-6 hover:bg-white/10 dark:hover:bg-black/10"
                                     onClick={() => onNavigateSibling(message.id, "next")}
                                     disabled={currentSiblingIndex === siblingCount - 1}
                                 >
-                                    <ChevronRight className="h-3.5 w-3.5" />
+                                    <ChevronRight className="h-4 w-4 md:h-3.5 md:w-3.5" />
                                 </Button>
                             </div>
                         )}
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                            className="h-8 px-2 md:h-6 text-xs text-white/70 dark:text-zinc-500 hover:text-white dark:hover:text-zinc-900 hover:bg-white/10 dark:hover:bg-black/10"
                             onClick={() => onFork(message.id)}
                         >
                             <GitBranch className="h-3.5 w-3.5 mr-1" />
@@ -159,44 +159,44 @@ export function MessageBubble({
                         </div>
                     )}
                 </div>
-                {/* Actions */}
-                <div className="flex gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {siblingCount > 1 && (
-                        <div className="flex items-center gap-1 text-muted-foreground text-xs">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => onNavigateSibling(message.id, "prev")}
-                                disabled={currentSiblingIndex === 0}
-                            >
-                                <ChevronLeft className="h-3.5 w-3.5" />
-                            </Button>
-                            <span className="font-mono">{currentSiblingIndex + 1}/{siblingCount}</span>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => onNavigateSibling(message.id, "next")}
-                                disabled={currentSiblingIndex === siblingCount - 1}
-                            >
-                                <ChevronRight className="h-3.5 w-3.5" />
-                            </Button>
-                        </div>
-                    )}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                        onClick={() => onFork(message.id)}
-                    >
-                        <GitBranch className="h-3.5 w-3.5 mr-1" />
-                        Fork
-                    </Button>
-                </div>
+                    {/* Actions - visible on hover or always on mobile */}
+                    <div className="flex justify-end gap-1 mt-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                        {siblingCount > 1 && (
+                            <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 md:h-6 md:w-6"
+                                    onClick={() => onNavigateSibling(message.id, "prev")}
+                                    disabled={currentSiblingIndex === 0}
+                                >
+                                    <ChevronLeft className="h-4 w-4 md:h-3.5 md:w-3.5" />
+                                </Button>
+                                <span className="font-mono">{currentSiblingIndex + 1}/{siblingCount}</span>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 md:h-6 md:w-6"
+                                    onClick={() => onNavigateSibling(message.id, "next")}
+                                    disabled={currentSiblingIndex === siblingCount - 1}
+                                >
+                                    <ChevronRight className="h-4 w-4 md:h-3.5 md:w-3.5" />
+                                </Button>
+                            </div>
+                        )}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2 md:h-6 text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => onFork(message.id)}
+                        >
+                            <GitBranch className="h-3.5 w-3.5 mr-1" />
+                            Fork
+                        </Button>
+                    </div>
             </div>
         </motion.div>
     );
-}
+});
 
 

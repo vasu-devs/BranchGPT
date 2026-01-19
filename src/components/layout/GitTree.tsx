@@ -1,7 +1,7 @@
 "use client";
 
+import React, { memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-
 import { BranchIcon } from "@/components/icons/BranchIcon";
 import { MergeIcon } from "@/components/icons/MergeIcon";
 import { DeleteIcon } from "@/components/icons/DeleteIcon";
@@ -16,6 +16,7 @@ interface GitTreeProps {
         parentBranchId: string | null;
         rootMessageId: string | null;
         messageCount?: number;
+        isMerged?: boolean;
     }[];
     currentBranchId: string | null;
     onSelectBranch: (branchId: string) => void;
@@ -26,7 +27,7 @@ interface GitTreeProps {
     isMobile?: boolean;
 }
 
-export function GitTree({
+export const GitTree = memo(function GitTree({
     branches,
     currentBranchId,
     onSelectBranch,
@@ -36,8 +37,8 @@ export function GitTree({
     onToggleCollapse,
     isMobile = false,
 }: GitTreeProps) {
-    const mainBranch = branches.find((b) => b.name === "main" || !b.parentBranchId);
-    const childBranches = branches.filter((b) => b.parentBranchId);
+    const mainBranch = useMemo(() => branches.find((b) => b.name === "main" || !b.parentBranchId), [branches]);
+    const childBranches = useMemo(() => branches.filter((b) => b.parentBranchId), [branches]);
 
     if (isCollapsed) {
         return (
@@ -170,9 +171,9 @@ export function GitTree({
             </div>
         </div>
     );
-}
+});
 
-function BranchNode({
+const BranchNode = memo(function BranchNode({
     branch,
     allBranches,
     currentBranchId,
@@ -189,7 +190,7 @@ function BranchNode({
     onMergeBranch?: (id: string) => void;
     depth: number;
 }) {
-    const childBranches = allBranches.filter((b) => b.parentBranchId === branch.id);
+    const childBranches = useMemo(() => allBranches.filter((b) => b.parentBranchId === branch.id), [allBranches, branch.id]);
     const branchLabel = branch.name.startsWith("Branch ") ? `#${branch.name.slice(-6)}` : branch.name;
     const isMain = branch.name === "main";
     const isActive = currentBranchId === branch.id;
@@ -270,4 +271,4 @@ function BranchNode({
             )}
         </div>
     );
-}
+});

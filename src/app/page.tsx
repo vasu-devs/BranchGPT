@@ -31,6 +31,7 @@ import {
     getConversations,
     getBranchHead,
     getBranchTree,
+    getBranchTreeDetailed,
     deleteBranch,
     generateBranchTitle,
     updateBranchName,
@@ -57,9 +58,6 @@ interface BranchInfo {
 export default function ChatPage() {
     const [messages, setMessages] = useState<MessageWithMeta[]>([]);
     const [conversations, setConversations] = useState<BranchInfo[]>([]);
-    // ... (start of component)
-
-    // ... existing code ...
 
 
 
@@ -169,60 +167,8 @@ export default function ChatPage() {
         try {
             setCurrentConversationId(rootBranchId);
 
-            // 1. Get all branches for this tree
-            const allBranches = await getBranchTree(rootBranchId);
-
-            // Filter branches relevant to this tree (descendants of root)
-            // Since our backend currently fetches all, we filter here
-            // But actually we need to traverse down from rootBranchId
-            // A simple way is to find all branches where root or parent chain leads to rootBranchId
-
-            // For now, let's just assume we want branches that are EITHER the root
-            // OR have a parent in the list recursively.
-            // Efficient approach: Build map of parent->children
-
-            const treeBranches = allBranches.filter(b => true); // Placeholder - let's refine this
-
-            // Actually, we can just use a recursive check or build the tree
-            // Since we know the root, we can find its children, then their children...
-
-            const buildTreeIds = (branches: typeof allBranches, rootId: string): Set<string> => {
-                const ids = new Set<string>([rootId]);
-                let added = true;
-                while (added) {
-                    added = false;
-                    for (const b of branches) {
-                        if (!ids.has(b.id) && b.parentBranchId && ids.has(b.parentBranchId)) {
-                            ids.add(b.id);
-                            added = true;
-                        }
-                    }
-                }
-                return ids;
-            };
-
-            const relevantIds = buildTreeIds(allBranches, rootBranchId);
-            const filteredBranches = allBranches.filter(b => relevantIds.has(b.id));
-
-            const branchesWithCount: BranchInfo[] = await Promise.all(
-                filteredBranches.map(async (branch) => {
-                    const head = await getBranchHead(branch.id);
-                    let messageCount = 0;
-                    if (head) {
-                        const history = await getConversationHistory(head.id);
-                        messageCount = history.length;
-                    }
-                    return {
-                        id: branch.id,
-                        name: branch.name,
-                        messageCount,
-                        createdAt: branch.createdAt,
-                        isMain: branch.id === rootBranchId,
-                        parentBranchId: branch.parentBranchId,
-                        rootMessageId: branch.rootMessageId,
-                    };
-                })
-            );
+            // 1. Get all branches for this tree (Optimized - single call)
+            const branchesWithCount = await getBranchTreeDetailed(rootBranchId);
 
             setCurrentTreeBranches(branchesWithCount);
 
@@ -470,47 +416,9 @@ export default function ChatPage() {
                 });
 
                 if (currentConversationId) {
-                    // Silent update of tree
-                    getBranchTree(currentConversationId).then(allBranches => {
-                        // Re-run filter logic (duplicated for now, should refactor)
-                        const buildTreeIds = (branches: typeof allBranches, rootId: string): Set<string> => {
-                            const ids = new Set<string>([rootId]);
-                            let added = true;
-                            while (added) {
-                                added = false;
-                                for (const b of branches) {
-                                    if (!ids.has(b.id) && b.parentBranchId && ids.has(b.parentBranchId)) {
-                                        ids.add(b.id);
-                                        added = true;
-                                    }
-                                }
-                            }
-                            return ids;
-                        };
-                        const relevantIds = buildTreeIds(allBranches, currentConversationId);
-                        const filteredBranches = allBranches.filter(b => relevantIds.has(b.id));
-
-                        Promise.all(
-                            filteredBranches.map(async (branch) => {
-                                const head = await getBranchHead(branch.id);
-                                let messageCount = 0;
-                                if (head) {
-                                    const history = await getConversationHistory(head.id);
-                                    messageCount = history.length;
-                                }
-                                return {
-                                    id: branch.id,
-                                    name: branch.name,
-                                    messageCount,
-                                    createdAt: branch.createdAt,
-                                    isMain: branch.id === currentConversationId,
-                                    parentBranchId: branch.parentBranchId,
-                                    rootMessageId: branch.rootMessageId,
-                                };
-                            })
-                        ).then(branchesWithCount => {
-                            setCurrentTreeBranches(branchesWithCount);
-                        });
+                    // Optimized silent update of tree
+                    getBranchTreeDetailed(currentConversationId).then(branchesWithCount => {
+                        setCurrentTreeBranches(branchesWithCount);
                     });
                 }
 

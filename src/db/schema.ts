@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, timestamp, pgEnum, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Enum for message roles
@@ -13,7 +13,10 @@ export const branches = pgTable("branches", {
     isMerged: boolean("is_merged").notNull().default(false),
     userId: text("user_id").notNull().default("legacy"), // Session ID owner
     createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+    userIdIdx: index("user_id_idx").on(table.userId),
+    parentBranchIdx: index("parent_branch_idx").on(table.parentBranchId),
+}));
 
 // Messages table - the core tree structure (recursive adjacency list)
 export const messages = pgTable("messages", {
@@ -26,7 +29,10 @@ export const messages = pgTable("messages", {
         .notNull(),
     isHead: boolean("is_head").notNull().default(false), // Marks the tip of a branch
     createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+    branchIdIdx: index("branch_id_idx").on(table.branchId),
+    parentIdIdx: index("parent_id_idx").on(table.parentId),
+}));
 
 // Relations for Drizzle
 export const branchesRelations = relations(branches, ({ many, one }) => ({

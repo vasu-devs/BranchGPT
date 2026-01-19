@@ -74,9 +74,17 @@ export function ChatInput({
                     <Send className="h-5 w-5" />
                 </Button>
             </div>
-            <p className="text-center text-xs text-zinc-500 mt-2">
-                Press Enter to send, Shift+Enter for new line
-            </p>
+            <div className="mt-4 flex justify-center py-2">
+                <a
+                    href="https://vasudev.live"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-semibold text-zinc-400 hover:text-foreground transition-all flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-100/30 dark:bg-zinc-800/30 border border-zinc-200/50 dark:border-zinc-700/50 backdrop-blur-sm shadow-sm"
+                >
+                    <span className="opacity-70">Made with ❤️ by</span>
+                    <span className="tracking-tight text-zinc-900 dark:text-zinc-100 font-bold">Vasu-DevS</span>
+                </a>
+            </div>
         </div>
     );
 }

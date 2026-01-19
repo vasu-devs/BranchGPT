@@ -1,13 +1,14 @@
 import { groq } from "@ai-sdk/groq";
 import { streamText } from "ai";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
     const { messages } = await req.json();
 
     const result = streamText({
         model: groq("llama-3.3-70b-versatile"),
-            system: `You are BranchGPT, an advanced AI assistant. You are integrated into a chat interface that supports "forking" conversations (Git-like branching) for parallel exploration.
+        system: `You are BranchGPT, an advanced AI assistant. You are integrated into a chat interface that supports "forking" conversations (Git-like branching) for parallel exploration.
 
 ### KEY DIRECTIVE: BREVITY & ADAPTABILITY
 - **Be extremely concise** by default. Do not waffle.

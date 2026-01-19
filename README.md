@@ -4,7 +4,7 @@
 
 BranchGPT reimplements the chat interface as a **Directed Acyclic Graph (DAG)**. Unlike standard linear chatbots, BranchGPT allows you to **fork** any message into a new branch, explore parallel ideas, and **merge** valuable insights back into the main thread—just like Git, but for thinking.
 
-![BranchGPT Demo](https://placehold.co/1200x600/18181b/white?text=BranchGPT+Preview)
+Made with ❤️ by **[Vasu-DevS](https://vasudev.live)**
 
 ## ✨ Key Features
 
@@ -14,18 +14,16 @@ BranchGPT reimplements the chat interface as a **Directed Acyclic Graph (DAG)**.
 - **Context Preservation**: Each branch maintains its own unique history up to the fork point.
 
 ### 🧠 Smart Merging
-- **Concise Summaries**: When merging a branch back into its parent, the system generates a summarized transcript.
-- **Context Awareness**: The merge logic intelligently filters out shared history, adding *only* the new messages from the branch to avoid duplication.
+- **Concise Summaries**: When merging a branch back into its parent, the system generates a summarized transcript using Llama 3.3.
+- **Context Awareness**: The merge logic intelligently filters out shared history, adding *only* the new messages from the branch.
 - **System Events**: Merges are recorded as distinct system events in the chat stream.
 
 ### ⚡️ Optimized UX
-- **Auto-Focus Flow**: The input field automatically grabs focus after AI responses, allowing for seamless, keyboard-only conversation flow.
-- **Markdown Everywhere**: Full support for Rich Text, Code Blocks, and Mathematical Notation (LaTeX) in all messages—user, AI, and system.
-- **Adaptive Interface**: A responsive, 300px-wide sidebar that balances visibility with screen real estate.
+- **Auto-Focus Flow**: The input field automatically grabs focus after AI responses for seamless flow.
+- **Premium Design**: A high-fidelity, glassmorphic interface with support for Dark Mode.
+- **Markdown Everywhere**: Full support for Rich Text, Code Blocks, and Mathematical Notation (LaTeX).
 
 ## 📦 Tech Stack
-
-Built with a modern, type-safe stack designed for performance and reliability.
 
 | Layer | Technology |
 |-------|------------|
@@ -34,20 +32,20 @@ Built with a modern, type-safe stack designed for performance and reliability.
 | **Database** | [PostgreSQL](https://neon.tech/) (via Neon Serverless) |
 | **ORM** | [Drizzle ORM](https://orm.drizzle.team/) |
 | **AI Engine** | [Vercel AI SDK](https://sdk.vercel.ai/) + [Groq](https://groq.com/) (Llama 3.3) |
-| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/) |
+| **Styling** | [Vanilla CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) + [Tailwind CSS v4](https://tailwindcss.com/) |
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js 20+
-- A [Neon](https://neon.tech) PostgreSQL database
+- A [Neon](https://neon.tech) PostgreSQL database (or local Postgres)
 - A [Groq](https://console.groq.com/) API Key
 
 ### Installation
 
 1.  **Clone the repository**
     ```bash
-    git clone https://github.com/yourusername/branchgpt.git
+    git clone https://github.com/vasu-devs/branchgpt.git
     cd branchgpt
     ```
 
@@ -57,51 +55,33 @@ Built with a modern, type-safe stack designed for performance and reliability.
     ```
 
 3.  **Configure Environment**
-    Create a `.env` file in the root directory:
+    Create a `.env` file:
     ```env
-    # Database (Neon/Postgres)
     DATABASE_URL="postgresql://user:pass@ep-xyz.region.aws.neon.tech/neondb?sslmode=require"
-
-    # AI Provider
     GROQ_API_KEY="gsk_your_groq_api_key"
     ```
 
 4.  **Initialize Database**
-    Push the schema to your database:
     ```bash
     npx drizzle-kit push
     ```
 
-5.  **Run Development Server**
+5.  **Run Development**
     ```bash
     npm run dev
     ```
-    Visit [http://localhost:3000](http://localhost:3000) to start chatting.
 
 ## 📖 Usage Guide
 
-### Forking a Conversation
-1.  Hover over any message in the chat.
-2.  Click the **Fork Icon** (Git Branch symbol).
-3.  Enter a new prompt to steer the conversation in a new direction.
-4.  You are now in a new branch!
+### Forking
+Hover over any message and click the **Branch Icon**. Type your new prompt to start a new parallel conversation from that point.
 
-### Merging a Branch
-1.  Navigate to the branch you want to merge (must be a child branch).
-2.  Click the **Merge Icon** (Purple Git Commit symbol) in the sidebar.
-3.  Confirm the action. The branch's transcript will be appended to the parent branch.
+### Merging
+Navigate to a child branch and click the **Merge Icon** in the sidebar. The system will summarize the branch and append it to the parent conversation.
 
-### Deleting a Branch
-1.  Click the **Trash Icon** next to any branch in the sidebar.
-2.  **Warning**: This cascades and creates all sub-branches born from it.
-
-## 🗃️ Database Schema
-
-The core data model revolves around two tables:
-
-- **`branches`**: Represents a timeline. Stores `parentBranchId` and `rootMessageId` to define the graph structure.
-- **`messages`**: Linked list of chat nodes. Stores `parentId` to allow recursive history traversal.
+### Switching Branches
+Use the **Git Tree** sidebar on the right to visualize your entire conversation graph and switch between branches instantly.
 
 ## 📄 License
 
-MIT © [Project Owner]
+MIT © [Vasu-DevS](https://vasudev.live)
