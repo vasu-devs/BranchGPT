@@ -280,7 +280,7 @@ export default function ChatPage() {
         setStreamingContent("");
         try {
             const aiMessages = messages.map((msg) => ({
-                role: msg.role as "user" | "assistant",
+                role: msg.role as "user" | "assistant" | "system",
                 content: msg.content,
             }));
             aiMessages.push({ role: "user", content: userContent });
