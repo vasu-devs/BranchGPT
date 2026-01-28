@@ -132,6 +132,34 @@ export default function ChatPage() {
         branchId: "",
     });
 
+    // Keyboard Shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const isMod = e.metaKey || e.ctrlKey;
+            
+            // CMD + K: New Chat
+            if (isMod && e.key === "k") {
+                e.preventDefault();
+                handleNewChat();
+            }
+            
+            // CMD + \ : Toggle Sidebar
+            if (isMod && e.key === "\\") {
+                e.preventDefault();
+                setSidebarCollapsed(prev => !prev);
+            }
+
+            // CMD + B : Toggle Tree
+            if (isMod && e.key === "b") {
+                e.preventDefault();
+                setGitTreeCollapsed(prev => !prev);
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [currentConversationId, currentBranchId]);
+
     // Load initial list of conversations
     useEffect(() => {
         const init = async () => {
@@ -658,21 +686,21 @@ export default function ChatPage() {
 
     if (!isInitialized) {
         return (
-            <div className="flex items-center justify-center h-screen bg-white dark:bg-black">
-                <div className="text-center">
-                    <div className="w-12 h-12 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black flex items-center justify-center mx-auto mb-4 animate-pulse">
-                        <span className="text-zinc-900 dark:text-white font-bold text-lg">B</span>
+            <div className="flex items-center justify-center h-screen bg-background relative overflow-hidden">
+                <div className="text-center z-10">
+                    <div className="w-12 h-12 rounded-full border border-border bg-background flex items-center justify-center mx-auto mb-4 animate-pulse">
+                        <span className="text-foreground font-bold text-lg">B</span>
                     </div>
-                    <p className="text-zinc-500 text-sm">Loading BranchGPT...</p>
+                    <p className="text-muted-foreground text-sm">Loading BranchGPT...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="flex h-[100dvh] bg-white dark:bg-black flex-col md:flex-row">
+        <div className="flex h-[100dvh] bg-background flex-col md:flex-row overflow-hidden relative font-sans">
             {/* Mobile Header */}
-            <header className="md:hidden h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white dark:bg-black shrink-0 relative z-30">
+            <header className="md:hidden h-14 border-b border-white/5 flex items-center justify-between px-4 glass shrink-0 relative z-30">
                 <Sheet>
                     <SheetTrigger asChild>
                         <Button variant="ghost" size="icon" className="-ml-2">
@@ -728,7 +756,7 @@ export default function ChatPage() {
             </div>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-background border-x border-zinc-200 dark:border-zinc-800 shadow-sm z-10 overflow-hidden">
+            <main className="flex-1 flex flex-col min-w-0 bg-transparent border-x border-white/5 shadow-2xl z-10 overflow-hidden relative">
                 <ChatView
                     messages={messages}
                     branchName={branchName}
@@ -754,23 +782,25 @@ export default function ChatPage() {
             </div>
 
             <Dialog open={deleteConfirmation.isOpen} onOpenChange={(open) => setDeleteConfirmation(prev => ({ ...prev, isOpen: open }))}>
-                <DialogContent className="bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white sm:max-w-md">
+                <DialogContent className="glass-card shadow-3xl border-white/20 dark:border-white/5 text-foreground sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Delete {deleteConfirmation.type === "branch" ? "Branch" : "Chat"}</DialogTitle>
-                        <DialogDescription className="text-zinc-500 dark:text-zinc-400">
+                        <DialogTitle className="text-xl font-bold tracking-tight">Delete {deleteConfirmation.type === "branch" ? "Branch" : "Chat"}</DialogTitle>
+                        <DialogDescription className="text-muted-foreground text-base">
                             Are you sure you want to delete "{deleteConfirmation.name}"? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0">
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
                         <Button
                             variant="outline"
                             onClick={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
+                            className="rounded-full"
                         >
                             Cancel
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={confirmDelete}
+                            className="rounded-full shadow-lg transition-all"
                         >
                             Delete
                         </Button>
@@ -779,23 +809,24 @@ export default function ChatPage() {
             </Dialog>
 
             <Dialog open={mergeConfirmation.isOpen} onOpenChange={(open) => setMergeConfirmation(prev => ({ ...prev, isOpen: open }))}>
-                <DialogContent className="bg-white dark:bg-black border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white sm:max-w-md">
+                <DialogContent className="glass-card shadow-3xl border-white/20 dark:border-white/5 text-foreground sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Merge Branch</DialogTitle>
-                        <DialogDescription className="text-zinc-500 dark:text-zinc-400">
+                        <DialogTitle className="text-xl font-bold tracking-tight text-gradient">Merge Branch</DialogTitle>
+                        <DialogDescription className="text-muted-foreground text-base">
                             Are you sure you want to merge this branch into its parent? This will summarize the conversation and add it to the parent branch.
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0">
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
                         <Button
                             variant="outline"
                             onClick={() => setMergeConfirmation(prev => ({ ...prev, isOpen: false }))}
+                            className="rounded-full"
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={confirmMerge}
-                            className="bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                            className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-bold glossy-button rounded-xl"
                         >
                             Merge Branch
                         </Button>

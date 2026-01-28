@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BranchIcon } from "@/components/icons/BranchIcon";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
 interface MessageWithMeta extends Message {
     siblingCount: number;
@@ -42,18 +43,35 @@ export function ChatView({
     isLoading = false,
     streamingContent,
 }: ChatViewProps) {
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [isAtBottom, setIsAtBottom] = useState(true);
     const [forkModalOpen, setForkModalOpen] = useState(false);
     const [forkMessageId, setForkMessageId] = useState<string | null>(null);
     const [forkContent, setForkContent] = useState("");
     const [forkSourceContent, setForkSourceContent] = useState("");
 
-    // Auto-scroll to bottom on new messages
+    const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+        messagesEndRef.current?.scrollIntoView({ behavior });
+    };
+
+    // Track scroll position to decide if we should auto-scroll
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const target = e.currentTarget;
+        const diff = Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight);
+        setIsAtBottom(diff < 50); // Threshold of 50px
+    };
+
+    // Auto-scroll on new messages or streaming
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        if (isAtBottom || (messages.length > 0 && messages[messages.length - 1].role === "user")) {
+            scrollToBottom();
         }
-    }, [messages, streamingContent]);
+    }, [messages, streamingContent, isAtBottom]);
+
+    // Initial scroll
+    useEffect(() => {
+        scrollToBottom("auto");
+    }, []);
 
     const handleForkClick = (messageId: string) => {
         const message = messages.find((m) => m.id === messageId);
@@ -78,24 +96,24 @@ export function ChatView({
         <div className="flex flex-col h-full bg-transparent">
             {/* Scrollable Messages Area */}
             <div
-                ref={scrollRef}
-                className="flex-1 overflow-y-auto no-scrollbar"
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto no-scrollbar scroll-smooth"
             >
                 <div className="max-w-3xl mx-auto px-6 py-8">
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center mb-6 backdrop-blur-sm">
-                                <BranchIcon className="h-8 w-8 text-zinc-400 dark:text-zinc-500" />
+                            <div className="w-20 h-20 rounded-3xl glass-card flex items-center justify-center mb-8 shadow-2xl transition-transform duration-500 hover:scale-110">
+                                <BranchIcon className="h-10 w-10 text-slate-400 dark:text-slate-500" />
                             </div>
-                            <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-3">
-                                Start a conversation
+                            <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-4 text-gradient">
+                                New Conversation
                             </h2>
-                            <p className="text-base text-zinc-500 max-w-md leading-relaxed">
-                                Ask anything. Fork messages to explore different directions.
+                            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-md leading-relaxed px-4">
+                                Deep dive into ideas. Fork any message to explore parallel branches of thought.
                             </p>
                         </div>
                     ) : (
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                             {messages.map((message) => (
                                 <MessageBubble
                                     key={message.id}
@@ -129,17 +147,20 @@ export function ChatView({
 
                             {/* Loading dots */}
                             {isLoading && !streamingContent && (
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                                        <span className="text-sm font-semibold text-zinc-500">AI</span>
+                                <div className="flex items-center gap-4 py-4 px-2">
+                                    <div className="w-10 h-10 rounded-2xl glass flex items-center justify-center shadow-lg">
+                                        <span className="text-xs font-black text-slate-400">AI</span>
                                     </div>
-                                    <div className="flex gap-1.5">
-                                        <span className="w-2.5 h-2.5 bg-zinc-400 rounded-full animate-bounce" />
-                                        <span className="w-2.5 h-2.5 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                                        <span className="w-2.5 h-2.5 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                                    <div className="flex gap-2">
+                                        <span className="w-2.5 h-2.5 bg-slate-400/30 rounded-full animate-bounce" />
+                                        <span className="w-2.5 h-2.5 bg-slate-400/30 rounded-full animate-bounce [animation-delay:0.2s]" />
+                                        <span className="w-2.5 h-2.5 bg-slate-400/30 rounded-full animate-bounce [animation-delay:0.4s]" />
                                     </div>
                                 </div>
                             )}
+
+                            {/* Anchor for auto-scroll */}
+                            <div ref={messagesEndRef} className="h-4" />
                         </div>
                     )}
                 </div>
@@ -156,7 +177,7 @@ export function ChatView({
 
             {/* Fork Dialog */}
             <Dialog open={forkModalOpen} onOpenChange={setForkModalOpen}>
-                <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col">
+                <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col glass-card border-none shadow-3xl">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
                             <BranchIcon className="h-5 w-5" />
@@ -186,17 +207,17 @@ export function ChatView({
                                 value={forkContent}
                                 onChange={(e) => setForkContent(e.target.value)}
                                 rows={3}
-                                className="resize-none text-base"
+                                className="resize-none text-base rounded-xl border-border bg-background focus:ring-0"
                                 autoFocus
                             />
                         </div>
                     </div>
 
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setForkModalOpen(false)}>
+                        <Button variant="outline" onClick={() => setForkModalOpen(false)} className="rounded-full">
                             Cancel
                         </Button>
-                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()}>
+                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()} className="rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
                             Create Branch
                         </Button>
                     </DialogFooter>
