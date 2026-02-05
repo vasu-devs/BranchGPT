@@ -48,15 +48,15 @@ function CollapsibleTranscript({ content }: { content: string }) {
 
 const entryVariants: Variants = {
     hidden: { opacity: 0, y: 15, filter: "blur(8px)", scale: 0.98 },
-    visible: { 
-        opacity: 1, 
-        y: 0, 
+    visible: {
+        opacity: 1,
+        y: 0,
         filter: "blur(0px)",
         scale: 1,
-        transition: { 
-            duration: 0.5, 
-            ease: "easeOut" 
-        } 
+        transition: {
+            duration: 0.5,
+            ease: "easeOut"
+        }
     }
 };
 
@@ -87,8 +87,8 @@ export const MessageBubble = React.memo(function MessageBubble({
                 className="flex justify-end group py-3"
             >
                 <div className="max-w-[85%]">
-                    <div className="bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 px-6 py-4 rounded-[2rem] rounded-br-[0.5rem] shadow-xl bg-gradient-to-br from-slate-800 to-slate-900 dark:from-white dark:to-slate-100 border border-white/10 dark:border-black/5">
-                        <div className="prose prose-sm prose-invert dark:prose-neutral max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 leading-relaxed font-sans">
+                    <div className="matte px-5 py-4 rounded-2xl rounded-br-lg relative overflow-hidden">
+                        <div className="prose dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 leading-relaxed font-sans relative z-10">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {message.content}
                             </ReactMarkdown>
@@ -122,26 +122,20 @@ export const MessageBubble = React.memo(function MessageBubble({
                         <Button
                             variant="ghost"
                             size="sm"
-                            asChild
-                            className="h-8 px-4 rounded-full text-xs font-semibold bg-white/5 dark:bg-black/5 backdrop-blur-md border border-white/10 dark:border-black/5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/10 dark:hover:bg-black/10 transition-all shadow-sm"
+                            className="h-8 px-4 rounded-full text-xs font-semibold silk text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shadow-sm"
                             onClick={handleCopy}
                         >
-                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                {copied ? <Check className="h-3.5 w-3.5 mr-2" /> : <Copy className="h-3.5 w-3.5 mr-2" />}
-                                {copied ? "Copied" : "Copy"}
-                            </motion.button>
+                            {copied ? <Check className="h-3.5 w-3.5 mr-2" /> : <Copy className="h-3.5 w-3.5 mr-2" />}
+                            {copied ? "Copied" : "Copy"}
                         </Button>
                         <Button
                             variant="ghost"
                             size="sm"
-                            asChild
-                            className="h-8 px-4 rounded-full text-xs font-semibold bg-white/5 dark:bg-black/5 backdrop-blur-md border border-white/10 dark:border-black/5 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/10 dark:hover:bg-black/10 transition-all shadow-sm"
+                            className="h-8 px-4 rounded-full text-xs font-semibold silk text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shadow-sm"
                             onClick={() => onFork(message.id)}
                         >
-                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <GitBranch className="h-3.5 w-3.5 mr-2" />
-                                Fork
-                            </motion.button>
+                            <GitBranch className="h-3.5 w-3.5 mr-2" />
+                            Fork
                         </Button>
                     </div>
                 </div>
@@ -160,26 +154,26 @@ export const MessageBubble = React.memo(function MessageBubble({
         >
             {/* Avatar */}
             <div className={cn(
-                "w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border glass shadow-lg transition-transform duration-300 group-hover:scale-110",
+                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-sm transition-all duration-300",
                 message.role === "system"
-                    ? "bg-amber-100/30 dark:bg-amber-900/10 border-amber-200/50 dark:border-amber-800/50"
-                    : "bg-white dark:bg-slate-900 border-white/20 dark:border-white/5"
+                    ? "bg-amber-500/10 border-amber-500/20 text-amber-600"
+                    : "bg-background border-border/60"
             )}>
                 {message.role === "system" ? (
-                    <GitBranch className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    <GitBranch className="h-6 w-6" />
                 ) : (
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-slate-400 blur-md opacity-20 animate-pulse" />
-                        <span className="relative text-xs font-black tracking-tighter text-slate-900 dark:text-slate-100 uppercase">AI</span>
+                    <div className="relative flex items-center justify-center">
+                        <div className="absolute inset-0 bg-primary blur-xl opacity-20 animate-pulse" />
+                        <span className="relative text-[10px] font-black tracking-widest uppercase">AI</span>
                     </div>
                 )}
             </div>
             {/* Content */}
             <div className="flex-1 min-w-0 pt-1">
-                <div className="prose prose-slate dark:prose-invert max-w-none">
+                <div className="prose max-w-none">
                     {message.role === "system" && message.content.includes("### Transcript:") ? (
-                        <div className="flex flex-col gap-3">
-                            <div className="glass-card p-5 text-amber-900/80 dark:text-amber-100/80 font-medium italic border-amber-200/30 dark:border-amber-800/30">
+                        <div className="flex flex-col gap-4">
+                            <div className="glass-card p-6 text-amber-900/80 dark:text-amber-100/80 font-medium italic border-amber-500/20 shadow-xl">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {message.content.split("\n\n### Transcript:\n")[0]}
                                 </ReactMarkdown>
@@ -188,21 +182,21 @@ export const MessageBubble = React.memo(function MessageBubble({
                         </div>
                     ) : (
                         <div className={cn(
-                            "text-base leading-relaxed p-1 font-sans",
-                            message.role === "system" ? "text-amber-800/90 dark:text-amber-200/90 italic font-medium glass-card p-6 border-amber-500/10" : "text-slate-700 dark:text-slate-300"
+                            "text-base leading-relaxed p-5 rounded-2xl glass-card transition-all duration-300",
+                            message.role === "system" ? "text-amber-800/90 dark:text-amber-200/90 italic font-medium border-amber-500/20" : ""
                         )}>
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {message.content}
                             </ReactMarkdown>
                             {isStreaming && (
-                                <span className="inline-block w-2 h-5 ml-1 bg-slate-400/50 animate-pulse rounded-full align-middle" />
+                                <span className="inline-block w-2 h-5 ml-1 bg-primary/40 animate-pulse rounded-sm align-middle" />
                             )}
                         </div>
                     )}
                 </div>
             </div>
-             {/* Actions on hover for AI */}
-             <div className="flex justify-start gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Actions on hover for AI */}
+            <div className="flex justify-start gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                     variant="ghost"
                     size="sm"
@@ -215,7 +209,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         {copied ? "Copied" : "Copy"}
                     </motion.button>
                 </Button>
-                 <Button
+                <Button
                     variant="ghost"
                     size="sm"
                     asChild
@@ -227,7 +221,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         Fork
                     </motion.button>
                 </Button>
-             </div>
+            </div>
         </motion.div>
     );
 });

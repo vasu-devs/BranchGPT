@@ -97,21 +97,51 @@ export function ChatView({
             {/* Scrollable Messages Area */}
             <div
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto no-scrollbar scroll-smooth"
+                className="flex-1 overflow-y-auto technical-scroll scroll-smooth"
             >
                 <div className="max-w-3xl mx-auto px-6 py-8">
                     {messages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                            <div className="w-20 h-20 rounded-3xl glass-card flex items-center justify-center mb-8 shadow-2xl transition-transform duration-500 hover:scale-110">
-                                <BranchIcon className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="flex flex-col items-center justify-center min-h-[70vh] text-center"
+                        >
+                            <div className="w-16 h-16 rounded-2xl matte flex items-center justify-center mb-8 shadow-sm transition-transform duration-300 hover:rotate-6">
+                                <BranchIcon className="h-8 w-8 text-primary" />
                             </div>
-                            <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-4 text-gradient">
-                                New Conversation
+                            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">
+                                BranchGPT
                             </h2>
-                            <p className="text-lg text-slate-500 dark:text-slate-400 max-w-md leading-relaxed px-4">
-                                Deep dive into ideas. Fork any message to explore parallel branches of thought.
+                            <p className="text-base text-muted-foreground max-w-md leading-relaxed mb-10 opacity-80">
+                                Thinking isn't linear. It's branched.
                             </p>
-                        </div>
+
+                            <div className="w-full max-w-2xl mb-10">
+                                <ChatInput
+                                    onSend={onSendMessage}
+                                    disabled={isLoading}
+                                    placeholder="Start a new branch of thought..."
+                                />
+                            </div>
+
+                            <div className="flex flex-wrap justify-center gap-2">
+                                {[
+                                    "Explain quantum entanglement like I'm 5",
+                                    "How to build a SaaS in 2024?",
+                                    "Why is rust becoming so popular?",
+                                    "Write a poem about time travel"
+                                ].map((starter) => (
+                                    <button
+                                        key={starter}
+                                        onClick={() => onSendMessage(starter)}
+                                        className="px-4 py-2 rounded-xl text-sm font-medium border border-border/60 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200"
+                                    >
+                                        {starter}
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
                     ) : (
                         <div className="space-y-8">
                             {messages.map((message) => (
@@ -148,13 +178,25 @@ export function ChatView({
                             {/* Loading dots */}
                             {isLoading && !streamingContent && (
                                 <div className="flex items-center gap-4 py-4 px-2">
-                                    <div className="w-10 h-10 rounded-2xl glass flex items-center justify-center shadow-lg">
-                                        <span className="text-xs font-black text-slate-400">AI</span>
+                                    <div className="w-10 h-10 rounded-2xl matte flex items-center justify-center shadow-sm border border-border">
+                                        <span className="text-xs font-black text-foreground">AI</span>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <span className="w-2.5 h-2.5 bg-slate-400/30 rounded-full animate-bounce" />
-                                        <span className="w-2.5 h-2.5 bg-slate-400/30 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                        <span className="w-2.5 h-2.5 bg-slate-400/30 rounded-full animate-bounce [animation-delay:0.4s]" />
+                                    <div className="flex gap-1.5 items-center">
+                                        <motion.span
+                                            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 1, 0.3] }}
+                                            transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}
+                                            className="w-2 h-2 bg-primary/40 rounded-full"
+                                        />
+                                        <motion.span
+                                            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 1, 0.3] }}
+                                            transition={{ repeat: Infinity, duration: 1.5, delay: 0.3 }}
+                                            className="w-2 h-2 bg-primary/40 rounded-full"
+                                        />
+                                        <motion.span
+                                            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 1, 0.3] }}
+                                            transition={{ repeat: Infinity, duration: 1.5, delay: 0.6 }}
+                                            className="w-2 h-2 bg-primary/40 rounded-full"
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -166,33 +208,44 @@ export function ChatView({
                 </div>
             </div>
 
-            {/* Fixed Input Area at Bottom */}
-            <div className="bg-gradient-to-t from-background via-background/80 to-transparent pt-10 pb-2">
-                <ChatInput
-                    onSend={onSendMessage}
-                    disabled={isLoading}
-                    placeholder={isLoading ? "Thinking..." : "Type a message..."}
-                />
-            </div>
+            {/* Fixed Input Area at Bottom - only show when there are messages */}
+            <AnimatePresence>
+                {messages.length > 0 && (
+                    <motion.div
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 100, opacity: 0 }}
+                        className="bg-gradient-to-t from-background via-background/80 to-transparent pt-10 pb-2"
+                    >
+                        <ChatInput
+                            onSend={onSendMessage}
+                            disabled={isLoading}
+                            placeholder={isLoading ? "Thinking..." : "Continue the branch..."}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Fork Dialog */}
             <Dialog open={forkModalOpen} onOpenChange={setForkModalOpen}>
-                <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col glass-card border-none shadow-3xl">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
-                            <BranchIcon className="h-5 w-5" />
+                <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col glass-card border border-border shadow-2xl rounded-2xl p-0 overflow-hidden">
+                    <div className="p-6 pb-2">
+                        <DialogTitle className="flex items-center gap-3 text-xl font-bold tracking-tight text-foreground">
+                            <div className="w-8 h-8 rounded-lg matte flex items-center justify-center border border-border">
+                                <BranchIcon className="h-4 w-4" />
+                            </div>
                             Create Branch
                         </DialogTitle>
-                        <DialogDescription className="text-base">
+                        <DialogDescription className="text-muted-foreground text-sm">
                             Fork from this message to explore a different path.
                         </DialogDescription>
-                    </DialogHeader>
+                    </div>
 
-                    <div className="flex-1 overflow-y-auto min-h-0 space-y-4">
+                    <div className="flex-1 overflow-y-auto technical-scroll min-h-0 space-y-6 px-6 py-2">
                         {forkSourceContent && (
-                            <div className="rounded-xl bg-zinc-100 dark:bg-zinc-800 p-4">
-                                <p className="text-xs uppercase tracking-wider text-zinc-500 mb-2 font-medium">Original</p>
-                                <div className="text-base text-zinc-700 dark:text-zinc-300 prose prose-xs prose-neutral dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                            <div className="rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 p-4 border border-border/50">
+                                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-bold">Source Context</p>
+                                <div className="text-sm text-foreground/80 prose prose-xs prose-neutral dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {forkSourceContent}
                                     </ReactMarkdown>
@@ -200,24 +253,24 @@ export function ChatView({
                             </div>
                         )}
 
-                        <div className="space-y-2">
-                            <label className="text-base font-medium">Your new message</label>
+                        <div className="space-y-3">
+                            <label className="text-sm font-semibold text-foreground/90">Your new direction</label>
                             <Textarea
                                 placeholder="What would you like to say instead?"
                                 value={forkContent}
                                 onChange={(e) => setForkContent(e.target.value)}
                                 rows={3}
-                                className="resize-none text-base rounded-xl border-border bg-background focus:ring-0"
+                                className="resize-none text-base rounded-xl border-border bg-background focus:ring-0 shadow-sm"
                                 autoFocus
                             />
                         </div>
                     </div>
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setForkModalOpen(false)} className="rounded-full">
+                    <DialogFooter className="p-6 pt-2 border-t border-border/40">
+                        <Button variant="outline" onClick={() => setForkModalOpen(false)} className="rounded-xl border-border hover:bg-secondary">
                             Cancel
                         </Button>
-                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()} className="rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()} className="rounded-xl bg-foreground text-background hover:opacity-90 transition-opacity font-medium">
                             Create Branch
                         </Button>
                     </DialogFooter>

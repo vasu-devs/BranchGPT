@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, startTransition } from "react";
+import { flushSync } from "react-dom";
 import { ChatView } from "@/components/chat";
 import { Sidebar, GitTree } from "@/components/layout";
 import { Message } from "@/db/schema";
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/sheet";
 import { MenuIcon } from "@/components/icons/MenuIcon";
 import { BranchIcon } from "@/components/icons/BranchIcon";
+import { MergeIcon } from "@/components/icons/MergeIcon";
 import {
     getConversationHistory,
     createMessage,
@@ -136,13 +138,13 @@ export default function ChatPage() {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const isMod = e.metaKey || e.ctrlKey;
-            
+
             // CMD + K: New Chat
             if (isMod && e.key === "k") {
                 e.preventDefault();
                 handleNewChat();
             }
-            
+
             // CMD + \ : Toggle Sidebar
             if (isMod && e.key === "\\") {
                 e.preventDefault();
@@ -173,16 +175,16 @@ export default function ChatPage() {
                     isMerged: c.isMerged ?? false
                 })));
 
-                // If no conversations, create one
+                // If no conversations, LOAD DEMO MODE
                 if (conversationsWithCount.length === 0) {
-                    await handleNewChat();
+                    await initDemoMode();
                 } else {
                     // Load the most recent one
                     await handleSelectConversation(conversationsWithCount[0].id);
                 }
             } catch (error) {
                 console.error("Failed to load conversations:", error);
-                setDemoMode(true);
+                await initDemoMode(); // Fallback to demo on error too
             } finally {
                 setIsInitialized(true);
             }
@@ -190,8 +192,67 @@ export default function ChatPage() {
         init();
     }, []);
 
+    const initDemoMode = async () => {
+        const { demoBranches, demoMessages, getDemoBranchHead, getDemoMessagesForBranch } = await import("@/lib/demo-data");
+        setDemoMode(true);
+
+        // Set conversations list (just the main branch of demo)
+        const mainDemo = demoBranches.find(b => b.isMain)!;
+        setConversations([mainDemo]);
+
+        // Set current tree
+        setCurrentConversationId(mainDemo.id);
+        setCurrentTreeBranches(demoBranches);
+
+        // Select the "Adventure" branch to show the active decision
+        // User asked for "Pre-Branched Chat" deep state.
+        const targetBranchId = "demo-adventure";
+        const targetBranch = demoBranches.find(b => b.id === targetBranchId)!;
+
+        setCurrentBranchId(targetBranchId);
+        setBranchName(targetBranch.name);
+
+        const messages = getDemoMessagesForBranch(targetBranchId);
+        // Add sibling meta
+        const messagesWithMeta = messages.map(msg => {
+            const { siblings, currentIndex } = getDemoSiblingsLocal(msg.id, demoMessages);
+            return {
+                ...msg,
+                siblingCount: siblings.length,
+                currentSiblingIndex: currentIndex
+            };
+        });
+
+        setMessages(messagesWithMeta);
+
+        const head = messagesWithMeta[messagesWithMeta.length - 1];
+        setCurrentNodeId(head.id);
+    };
+
+    // Helper for demo siblings (recreated here to access dynamic import data if needed, or just use imported)
+    const getDemoSiblingsLocal = (messageId: string, allMessages: any[]) => {
+        const message = allMessages.find((m) => m.id === messageId);
+        if (!message || !message.parentId) {
+            return { siblings: [message!], currentIndex: 0 };
+        }
+        const siblings = allMessages.filter((m) => m.parentId === message.parentId);
+        const currentIndex = siblings.findIndex((s) => s.id === messageId);
+        return { siblings, currentIndex: currentIndex >= 0 ? currentIndex : 0 };
+    };
+
     // Load a specific conversation/tree
     const handleSelectConversation = async (rootBranchId: string) => {
+        if (rootBranchId === "demo-main") {
+            // Re-initialize demo mode if they click it in sidebar
+            await initDemoMode();
+            return;
+        }
+
+        if (demoMode) {
+            // If switching AWAY from demo mode to a real chat (e.g. they created one)
+            setDemoMode(false);
+        }
+
         try {
             setCurrentConversationId(rootBranchId);
 
@@ -237,6 +298,31 @@ export default function ChatPage() {
     }, []);
 
     const handleSelectBranch = async (branchId: string, branchesOverride?: BranchInfo[], forceRefresh = false) => {
+        if (demoMode && branchId.startsWith("demo-")) {
+            const { getDemoMessagesForBranch, demoMessages, getDemoSiblings } = await import("@/lib/demo-data");
+            const branchList = branchesOverride || currentTreeBranches;
+            const branch = branchList.find((b) => b.id === branchId);
+
+            setCurrentBranchId(branchId);
+            setBranchName(branch?.name || "Unknown");
+
+            const messages = getDemoMessagesForBranch(branchId);
+            // Add sibling meta
+            const messagesWithMeta = messages.map(msg => {
+                const { siblings, currentIndex } = getDemoSiblings(msg.id);
+                return {
+                    ...msg,
+                    siblingCount: siblings.length,
+                    currentSiblingIndex: currentIndex
+                };
+            });
+
+            setMessages(messagesWithMeta);
+            const head = messagesWithMeta[messagesWithMeta.length - 1];
+            setCurrentNodeId(head.id);
+            return;
+        }
+
         try {
             const branchList = branchesOverride || currentTreeBranches;
             const branch = branchList.find((b) => b.id === branchId);
@@ -335,7 +421,10 @@ export default function ChatPage() {
                     if (done) break;
                     const text = decoder.decode(value, { stream: true });
                     fullContent += text;
-                    setStreamingContent(fullContent);
+                    // flushSync forces immediate DOM update for each chunk
+                    flushSync(() => {
+                        setStreamingContent(fullContent);
+                    });
                 }
             }
             setIsLoading(false);
@@ -599,7 +688,47 @@ export default function ChatPage() {
     };
 
     const handleNavigateSibling = async (messageId: string, direction: "prev" | "next") => {
-        if (demoMode) return;
+        if (demoMode) {
+            const { getDemoSiblings, getDemoBranchHead, getDemoMessagesForBranch } = await import("@/lib/demo-data");
+            const { siblings, currentIndex } = getDemoSiblings(messageId);
+            const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
+
+            if (newIndex < 0 || newIndex >= siblings.length) return;
+
+            const newSibling = siblings[newIndex];
+            // In demo data, siblings might be from different branches or same.
+            // We need to switch to the branch that contains this sibling.
+            // But wait, the sibling itself holds the branchId.
+
+            setCurrentBranchId(newSibling.branchId);
+
+            const branch = currentTreeBranches.find(b => b.id === newSibling.branchId);
+            setBranchName(branch?.name || "Unknown");
+
+            // We need to load the conversation for this NEW branch head?
+            // Actually, if we are just navigating a node, we might be navigating to a node that is NOT the head of its branch.
+            // But in our simplified viewer, we basically "Switch Branch" to key off that node.
+            // Let's find the head of the branch this sibling belongs to.
+
+            const head = getDemoBranchHead(newSibling.branchId);
+            if (head) {
+                // Load full conversation for this demo branch
+                const messages = getDemoMessagesForBranch(newSibling.branchId);
+                const messagesWithMeta = messages.map(msg => {
+                    const { siblings, currentIndex } = getDemoSiblings(msg.id);
+                    return {
+                        ...msg,
+                        siblingCount: siblings.length,
+                        currentSiblingIndex: currentIndex
+                    };
+                });
+
+                setMessages(messagesWithMeta);
+                setCurrentNodeId(head.id);
+            }
+            return;
+        }
+
         try {
             const { siblings, currentIndex } = await getMessageSiblings(messageId);
             const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
@@ -657,7 +786,8 @@ export default function ChatPage() {
                     if (newConversations.length > 0) {
                         await handleSelectConversation(newConversations[0].id);
                     } else {
-                        await handleNewChat();
+                        // Instead of creating a new empty chat, go back to Demo Mode!
+                        await initDemoMode();
                     }
                 }
             } else {
@@ -756,7 +886,7 @@ export default function ChatPage() {
             </div>
 
             {/* Main Chat Area */}
-            <main className="flex-1 flex flex-col min-w-0 bg-transparent border-x border-white/5 shadow-2xl z-10 overflow-hidden relative">
+            <main className="flex-1 flex flex-col min-w-0 bg-transparent border-x border-white/5 z-10 overflow-hidden relative">
                 <ChatView
                     messages={messages}
                     branchName={branchName}
@@ -782,55 +912,64 @@ export default function ChatPage() {
             </div>
 
             <Dialog open={deleteConfirmation.isOpen} onOpenChange={(open) => setDeleteConfirmation(prev => ({ ...prev, isOpen: open }))}>
-                <DialogContent className="glass-card shadow-3xl border-white/20 dark:border-white/5 text-foreground sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold tracking-tight">Delete {deleteConfirmation.type === "branch" ? "Branch" : "Chat"}</DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-base">
-                            Are you sure you want to delete "{deleteConfirmation.name}"? This action cannot be undone.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button
-                            variant="outline"
-                            onClick={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
-                            className="rounded-full"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={confirmDelete}
-                            className="rounded-full shadow-lg transition-all"
-                        >
-                            Delete
-                        </Button>
-                    </DialogFooter>
+                <DialogContent className="glass-card shadow-3xl border border-border text-foreground sm:max-w-md rounded-2xl p-0 overflow-hidden">
+                    <div className="p-6">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-bold tracking-tight">Delete {deleteConfirmation.type === "branch" ? "Branch" : "Chat"}</DialogTitle>
+                            <DialogDescription className="text-muted-foreground text-sm mt-3 leading-relaxed">
+                                Are you sure you want to delete <span className="text-foreground font-semibold">"{deleteConfirmation.name}"</span>? This action is permanent.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="gap-3 mt-8">
+                            <Button
+                                variant="outline"
+                                onClick={() => setDeleteConfirmation(prev => ({ ...prev, isOpen: false }))}
+                                className="rounded-xl border-border flex-1"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={confirmDelete}
+                                className="rounded-xl shadow-lg transition-all flex-1 font-bold"
+                            >
+                                Delete
+                            </Button>
+                        </DialogFooter>
+                    </div>
                 </DialogContent>
             </Dialog>
 
             <Dialog open={mergeConfirmation.isOpen} onOpenChange={(open) => setMergeConfirmation(prev => ({ ...prev, isOpen: open }))}>
-                <DialogContent className="glass-card shadow-3xl border-white/20 dark:border-white/5 text-foreground sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="text-xl font-bold tracking-tight text-gradient">Merge Branch</DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-base">
-                            Are you sure you want to merge this branch into its parent? This will summarize the conversation and add it to the parent branch.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
-                        <Button
-                            variant="outline"
-                            onClick={() => setMergeConfirmation(prev => ({ ...prev, isOpen: false }))}
-                            className="rounded-full"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={confirmMerge}
-                            className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-bold glossy-button rounded-xl"
-                        >
-                            Merge Branch
-                        </Button>
-                    </DialogFooter>
+                <DialogContent className="glass-card shadow-3xl border border-border text-foreground sm:max-w-md rounded-2xl p-0 overflow-hidden">
+                    <div className="p-6">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
+                                <div className="p-2 rounded-lg matte border border-border">
+                                    <MergeIcon className="h-5 w-5" />
+                                </div>
+                                <span className="text-gradient">Merge Branch</span>
+                            </DialogTitle>
+                            <DialogDescription className="text-muted-foreground text-sm mt-3 leading-relaxed">
+                                Integrating changes from this branch into its parent. A summary will be generated automatically.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="gap-3 mt-8">
+                            <Button
+                                variant="outline"
+                                onClick={() => setMergeConfirmation(prev => ({ ...prev, isOpen: false }))}
+                                className="rounded-xl border-border flex-1"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={confirmMerge}
+                                className="flex-1 bg-foreground text-background hover:opacity-90 font-bold rounded-xl transition-all"
+                            >
+                                Merge Branch
+                            </Button>
+                        </DialogFooter>
+                    </div>
                 </DialogContent>
             </Dialog>
 

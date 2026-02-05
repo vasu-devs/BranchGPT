@@ -65,8 +65,8 @@ export function Sidebar({
             animate={{ width: isMobile ? "100%" : (isCollapsed ? 60 : 300) }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
-                "h-full glass flex flex-col z-20 transition-all duration-500",
-                !isMobile && "border-r border-white/10"
+                "h-full glass-panel flex flex-col z-20 transition-all duration-500",
+                !isMobile && "border-r border-border/40"
             )}
         >
             <div className="flex flex-col h-full">
@@ -151,10 +151,10 @@ export function Sidebar({
                                         <button
                                             onClick={() => onSelectBranch(branch.id)}
                                             className={cn(
-                                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all relative overflow-hidden",
+                                                "flex items-center gap-3 px-3 py-2 rounded-xl w-full text-left transition-all duration-300",
                                                 currentBranchId === branch.id
-                                                    ? "bg-background shadow-sm border border-border/50 text-foreground"
-                                                    : "hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 text-muted-foreground hover:text-foreground",
+                                                    ? "bg-primary text-primary-foreground shadow-lg scale-[1.02]"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/80",
                                                 isCollapsed && "justify-center px-0"
                                             )}
                                             title={isCollapsed ? branch.name : undefined}

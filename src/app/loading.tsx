@@ -1,4 +1,4 @@
-    export default function Loading() {
+export default function Loading() {
     return (
         <div className="flex h-[100dvh] bg-background flex-col md:flex-row overflow-hidden relative">
             {/* Desktop Sidebar Skeleton */}

@@ -87,8 +87,8 @@ export const GitTree = memo(function GitTree({
 
     return (
         <div className={cn(
-            "h-full glass flex flex-col transition-all duration-500",
-            isMobile ? "w-full" : "w-[300px] border-l border-white/10"
+            "h-full silk flex flex-col transition-all duration-500",
+            isMobile ? "w-full" : "w-[300px] border-l border-border/40"
         )}>
             {/* Header - Hide on Mobile */}
             {!isMobile && (
@@ -132,10 +132,10 @@ export const GitTree = memo(function GitTree({
                                     <button
                                         onClick={() => onSelectBranch(mainBranch.id)}
                                         className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg w-full text-left transition-all",
+                                            "flex items-center gap-3 px-3 py-2 rounded-xl w-full text-left transition-all duration-300",
                                             currentBranchId === mainBranch.id
-                                                ? "bg-background shadow-sm border border-border/50 text-foreground"
-                                                : "hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 border border-transparent text-muted-foreground hover:text-foreground"
+                                                ? "bg-primary text-primary-foreground shadow-lg scale-[1.02]"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
                                         )}
                                     >
                                         <BranchIcon className={cn(
@@ -149,7 +149,7 @@ export const GitTree = memo(function GitTree({
                                             )}>main</p>
                                         </div>
                                         {currentBranchId === mainBranch.id && (
-                                            <motion.span 
+                                            <motion.span
                                                 layoutId="head-badge"
                                                 initial={{ scale: 0.8 }}
                                                 animate={{ scale: 1 }}
@@ -164,7 +164,7 @@ export const GitTree = memo(function GitTree({
                                 {/* Child branches from main */}
                                 <AnimatePresence mode="popLayout">
                                     {childBranches.filter((b) => b.parentBranchId === mainBranch.id).length > 0 && (
-                                        <div className="ml-5 mt-2 border-l border-border/50 pl-4 space-y-2">
+                                        <div className="ml-5 mt-2 border-l-2 border-border/70 pl-4 space-y-2">
                                             {childBranches
                                                 .filter((b) => b.parentBranchId === mainBranch.id)
                                                 .map((branch, i) => (
@@ -246,21 +246,24 @@ const BranchNode = memo(function BranchNode({
                     <button
                         onClick={() => onSelectBranch(branch.id)}
                         className={cn(
-                            "flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-sm border",
+                            "flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-sm group/btn relative overflow-hidden",
                             isActive
-                                ? "bg-background shadow-sm border-border/50 text-foreground"
-                                : "hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 border-transparent text-muted-foreground hover:text-foreground"
+                                ? "bg-white dark:bg-zinc-900 shadow-sm border border-border text-foreground ring-1 ring-border/10"
+                                : "hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 border border-transparent text-muted-foreground hover:text-foreground"
                         )}
                     >
-                        <BranchIcon className={cn("h-3.5 w-3.5", branch.isMerged ? "text-purple-400" : "opacity-70")} />
-                        <span className={cn("font-sans truncate text-xs", branch.isMerged && "text-muted-foreground line-through")}>
+                        <BranchIcon className={cn("h-3.5 w-3.5 shrink-0", branch.isMerged ? "text-purple-400" : "opacity-70")} />
+                        <span className={cn("font-sans truncate text-xs flex-1", branch.isMerged && "text-muted-foreground line-through")}>
                             {branchLabel}
                         </span>
                     </button>
 
-                    {/* Options (Delete / Merge) */}
+                    {/* Options (Delete / Merge) - Sticky right */}
                     {!isMain && (
-                        <div className="flex items-center gap-0.5 ml-1 shrink-0 opacity-0 group-hover/node:opacity-100 transition-opacity">
+                        <div className={cn(
+                            "flex items-center gap-0.5 ml-1 shrink-0 transition-opacity p-0.5 rounded-lg",
+                            isActive ? "opacity-100 bg-zinc-50 dark:bg-zinc-800 shadow-sm border border-border" : "opacity-0 group-hover/node:opacity-100"
+                        )}>
                             {onMergeBranch && !branch.isMerged && branch.parentBranchId && (
                                 <button
                                     onClick={(e) => {
@@ -272,7 +275,7 @@ const BranchNode = memo(function BranchNode({
                                     className={cn(
                                         "h-6 w-6 flex items-center justify-center rounded-md transition-colors",
                                         isActive
-                                            ? "text-purple-500 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                            ? "text-purple-500 hover:bg-purple-100 dark:hover:bg-purple-900/40"
                                             : "text-border cursor-not-allowed"
                                     )}
                                 >
@@ -285,7 +288,7 @@ const BranchNode = memo(function BranchNode({
                                     onDeleteBranch(branch.id);
                                 }}
                                 title="Delete Branch"
-                                className="h-6 w-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                className="h-6 w-6 flex items-center justify-center rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
                             >
                                 <DeleteIcon className="h-3.5 w-3.5" />
                             </button>
@@ -297,7 +300,7 @@ const BranchNode = memo(function BranchNode({
             {/* Nested children */}
             <AnimatePresence mode="popLayout">
                 {childBranches.length > 0 && depth < 3 && (
-                    <div className="ml-4 mt-1 border-l border-border/50 pl-3 space-y-1">
+                    <div className="ml-4 mt-1 border-l-2 border-border/70 pl-3 space-y-1">
                         {childBranches.map((child, i) => (
                             <BranchNode
                                 key={child.id}
