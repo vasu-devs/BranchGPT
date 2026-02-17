@@ -122,7 +122,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-4 rounded-full text-xs font-semibold silk text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shadow-sm"
+                            className="h-8 px-4 rounded-full text-xs font-semibold btn-3d bg-white dark:bg-zinc-900 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shadow-sm"
                             onClick={handleCopy}
                         >
                             {copied ? <Check className="h-3.5 w-3.5 mr-2" /> : <Copy className="h-3.5 w-3.5 mr-2" />}
@@ -131,7 +131,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 px-4 rounded-full text-xs font-semibold silk text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shadow-sm"
+                            className="h-8 px-4 rounded-full text-xs font-semibold btn-3d bg-white dark:bg-zinc-900 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all shadow-sm"
                             onClick={() => onFork(message.id)}
                         >
                             <GitBranch className="h-3.5 w-3.5 mr-2" />
@@ -149,8 +149,8 @@ export const MessageBubble = React.memo(function MessageBubble({
             variants={entryVariants}
             initial="hidden"
             animate="visible"
-            layout
-            className="flex gap-4 group py-4"
+            layout={!isStreaming}
+            className={cn("flex gap-4 group py-4", isStreaming && "animate-none")}
         >
             {/* Avatar */}
             <div className={cn(
@@ -183,13 +183,14 @@ export const MessageBubble = React.memo(function MessageBubble({
                     ) : (
                         <div className={cn(
                             "text-base leading-relaxed p-5 rounded-2xl glass-card transition-all duration-300",
-                            message.role === "system" ? "text-amber-800/90 dark:text-amber-200/90 italic font-medium border-amber-500/20" : ""
+                            message.role === "system" ? "text-amber-800/90 dark:text-amber-200/90 italic font-medium border-amber-500/20" : "",
+                            isStreaming && "transition-none shadow-none"
                         )}>
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {message.content}
                             </ReactMarkdown>
                             {isStreaming && (
-                                <span className="inline-block w-2 h-5 ml-1 bg-primary/40 animate-pulse rounded-sm align-middle" />
+                                <span className="inline-block w-1.5 h-5 ml-1 bg-primary/60 animate-pulse rounded-sm align-middle" />
                             )}
                         </div>
                     )}

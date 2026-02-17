@@ -81,7 +81,7 @@ export function ChatInput({
                         placeholder={placeholder}
                         rows={1}
                         disabled={disabled}
-                        className="w-full bg-transparent border-none focus:ring-0 resize-none py-2.5 px-4 text-base placeholder:text-muted-foreground/60 transition-all text-foreground font-sans scroll-smooth"
+                        className="w-full bg-transparent border-none focus:ring-0 resize-none py-2.5 px-4 text-base placeholder:text-muted-foreground/60 transition-all text-foreground font-sans scroll-smooth relative z-10"
                     />
                     <AnimatePresence>
                         {input.length > 0 && isFocused && (
@@ -89,7 +89,7 @@ export function ChatInput({
                                 initial={{ opacity: 0, scale: 0.9, x: 10 }}
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, x: 10 }}
-                                className="absolute right-2 bottom-4 pointer-events-none"
+                                className="absolute right-2 bottom-4 pointer-events-none z-20"
                             >
                                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                                     <Command className="h-2.5 w-2.5" />
@@ -99,20 +99,15 @@ export function ChatInput({
                         )}
                     </AnimatePresence>
                 </div>
+
                 <Button
                     type="button"
                     onClick={() => handleSubmit()}
                     disabled={disabled || !input.trim()}
                     size="icon"
-                    asChild
-                    className="h-11 w-11 shrink-0 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm hover:shadow-md transition-all duration-200"
+                    className="h-11 w-11 shrink-0 rounded-xl btn-3d-primary shadow-sm hover:shadow-md transition-all duration-200 active:scale-95 z-10"
                 >
-                    <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                    >
-                        <Send className="h-5 w-5" />
-                    </motion.button>
+                    <Send className="h-5 w-5" />
                 </Button>
             </motion.div>
             <div className="mt-6 flex justify-center py-2">

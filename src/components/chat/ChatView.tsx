@@ -135,7 +135,7 @@ export function ChatView({
                                     <button
                                         key={starter}
                                         onClick={() => onSendMessage(starter)}
-                                        className="px-4 py-2 rounded-xl text-sm font-medium border border-border/60 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all duration-200"
+                                        className="px-4 py-2 rounded-xl text-sm font-medium btn-3d bg-white dark:bg-zinc-900 border-border text-foreground hover:bg-secondary/50 transition-all duration-200"
                                     >
                                         {starter}
                                     </button>
@@ -267,10 +267,10 @@ export function ChatView({
                     </div>
 
                     <DialogFooter className="p-6 pt-2 border-t border-border/40">
-                        <Button variant="outline" onClick={() => setForkModalOpen(false)} className="rounded-xl border-border hover:bg-secondary">
+                        <Button variant="outline" onClick={() => setForkModalOpen(false)} className="rounded-xl border-border hover:bg-secondary btn-3d bg-white dark:bg-zinc-900">
                             Cancel
                         </Button>
-                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()} className="rounded-xl bg-foreground text-background hover:opacity-90 transition-opacity font-medium">
+                        <Button onClick={handleForkSubmit} disabled={!forkContent.trim()} className="rounded-xl btn-3d-primary font-medium">
                             Create Branch
                         </Button>
                     </DialogFooter>

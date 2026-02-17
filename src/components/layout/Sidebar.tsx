@@ -108,12 +108,11 @@ export function Sidebar({
                         onClick={onNewChat}
                         asChild
                         className={cn(
-                            "w-full h-10 bg-background hover:bg-zinc-100 dark:hover:bg-zinc-900 text-foreground font-medium border border-border shadow-sm transition-all relative overflow-hidden group",
+                            "w-full h-10 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-foreground font-medium btn-3d transition-all relative overflow-hidden group border-border shadow-sm",
                             isCollapsed ? "px-0 justify-center" : "justify-start gap-3"
                         )}
                     >
                         <motion.button
-                            whileHover={{ scale: 1.02, y: -1 }}
                             whileTap={{ scale: 0.98 }}
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
