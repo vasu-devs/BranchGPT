@@ -109,23 +109,30 @@ export function ChatView({
                             exit={{ opacity: 0, scale: 0.95 }}
                             className="flex flex-col items-center justify-center min-h-[75vh] text-center max-w-3xl mx-auto"
                         >
-                            <div className="w-20 h-20 rounded-[2rem] matte flex items-center justify-center mb-6 shadow-md border border-border/40 transition-transform duration-500 hover:rotate-6 bg-white dark:bg-zinc-900">
-                                <BranchIcon className="h-10 w-10 text-primary drop-shadow-sm" />
-                            </div>
+                            <motion.div
+                                animate={{ y: [0, -10, 0] }}
+                                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                                className="w-20 h-20 rounded-[40%] bg-amber-100/50 dark:bg-amber-900/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.2)] border border-amber-500/30"
+                            >
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-amber-600 dark:text-amber-500">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.43 4 16.05 4 12C4 7.95 7.05 4.57 11 4.07V19.93ZM13 4.07C16.95 4.57 20 7.95 20 12C20 16.05 16.95 19.43 13 19.93V4.07Z" fill="currentColor" fillOpacity="0.2" />
+                                    <path d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2V22Z" fill="currentColor" />
+                                </svg>
+                            </motion.div>
 
-                            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground mb-4 pb-1">
-                                BranchGPT
+                            <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-foreground mb-4 pb-1 font-serif">
+                                Plant a Seed.
                             </h2>
                             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed mb-6 font-medium">
-                                Thoughts don't grow in a straight line. They take root, branch out, and flourish.
-                                <span className="block mt-2 text-foreground/80 font-semibold">Your AI should grow with you.</span>
+                                Human intelligence isn't linear. It forks, roots, and flourishes.
+                                <span className="block mt-2 text-foreground/80 font-bold tracking-wide">Grow your ideas organically.</span>
                             </p>
 
-                            <div className="w-full mb-10 -mt-4">
+                            <div className="w-full mb-10 -mt-2">
                                 <HeroAnimation />
                             </div>
 
-                            <div className="w-full max-w-2xl mb-12 relative z-10">
+                            <div className="w-full max-w-2xl relative z-10 mb-8 mt-4">
                                 <ChatInput
                                     onSend={onSendMessage}
                                     disabled={isLoading}
@@ -133,23 +140,26 @@ export function ChatView({
                                 />
                             </div>
 
-                            <div className="flex flex-col items-center gap-4">
-                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Try exploring these paths</p>
-                                <div className="flex flex-wrap justify-center gap-3">
+                            <div className="flex flex-col items-center gap-5 w-full">
+                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700/60 dark:text-amber-500/60">Or cultivate these paths</p>
+                                <div className="flex flex-wrap justify-center gap-4 w-full max-w-2xl px-4">
                                     {[
-                                        "Explain quantum entanglement",
-                                        "How do trees communicate?",
-                                        "Why is rust becoming so popular?",
-                                        "Write a poem about a quiet forest"
+                                        { title: "Quantum Entanglement", icon: "✨" },
+                                        { title: "Socrates vs Descartes", icon: "🏛️" },
+                                        { title: "Build a Next.js App", icon: "⚛️" },
+                                        { title: "Poem about a quiet forest", icon: "🌲" }
                                     ].map((starter, i) => (
                                         <motion.button
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0, transition: { delay: i * 0.1 + 0.5 } }}
-                                            key={starter}
-                                            onClick={() => onSendMessage(starter)}
-                                            className="px-5 py-2.5 rounded-2xl text-sm font-medium btn-3d bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md border hover:border-primary/30 text-foreground hover:bg-secondary/80 transition-all duration-300 shadow-sm"
+                                            initial={{ opacity: 0, y: 15, scale: 0.9 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1, transition: { delay: i * 0.15 + 0.8, type: "spring" } }}
+                                            whileHover={{ scale: 1.05, y: -2 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            key={starter.title}
+                                            onClick={() => onSendMessage(starter.title)}
+                                            className="px-5 py-3 rounded-[2rem] text-sm font-semibold flex items-center gap-3 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-md border border-border/80 hover:border-amber-500/50 text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-700 dark:hover:text-amber-400 transition-all duration-300 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(245,158,11,0.15)]"
                                         >
-                                            {starter}
+                                            <span className="text-lg">{starter.icon}</span>
+                                            {starter.title}
                                         </motion.button>
                                     ))}
                                 </div>

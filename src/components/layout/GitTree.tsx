@@ -132,30 +132,33 @@ export const GitTree = memo(function GitTree({
                                     <button
                                         onClick={() => onSelectBranch(mainBranch.id)}
                                         className={cn(
-                                            "flex items-center gap-3 px-3 py-2 rounded-xl w-full text-left transition-all duration-300",
+                                            "flex items-center gap-3 px-3 py-2 rounded-tl-[1.5rem] rounded-br-[1.5rem] rounded-tr-sm rounded-bl-sm w-full text-left transition-all duration-300 border",
                                             currentBranchId === mainBranch.id
-                                                ? "bg-primary text-primary-foreground shadow-lg scale-[1.02]"
-                                                : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                                                ? "bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700/50 shadow-[0_2px_10px_-2px_rgba(245,158,11,0.2)] scale-[1.02]"
+                                                : "bg-transparent border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/80"
                                         )}
                                     >
                                         <BranchIcon className={cn(
                                             "h-4 w-4",
-                                            currentBranchId === mainBranch.id ? "text-foreground" : "opacity-40"
+                                            currentBranchId === mainBranch.id ? "text-amber-700 dark:text-amber-400" : "opacity-40"
                                         )} />
                                         <div className="flex-1 min-w-0">
                                             <p className={cn(
-                                                "text-sm font-sans",
-                                                currentBranchId === mainBranch.id ? "font-medium" : "font-normal"
-                                            )}>main</p>
+                                                "text-sm font-sans flex items-center gap-2",
+                                                currentBranchId === mainBranch.id ? "font-bold tracking-wide" : "font-normal"
+                                            )}>
+                                                {currentBranchId === mainBranch.id && <span className="text-[10px]">✨</span>}
+                                                main
+                                            </p>
                                         </div>
                                         {currentBranchId === mainBranch.id && (
                                             <motion.span
                                                 layoutId="head-badge"
                                                 initial={{ scale: 0.8 }}
                                                 animate={{ scale: 1 }}
-                                                className="text-[10px] font-bold bg-foreground text-background px-1.5 py-0.5 rounded"
+                                                className="text-[9px] font-black uppercase tracking-widest bg-amber-600 text-white px-2 py-0.5 rounded-full"
                                             >
-                                                HEAD
+                                                ROOT
                                             </motion.span>
                                         )}
                                     </button>
@@ -165,12 +168,12 @@ export const GitTree = memo(function GitTree({
                                 <AnimatePresence mode="popLayout">
                                     {childBranches.filter((b) => b.parentBranchId === mainBranch.id).length > 0 && (
                                         <div className="relative ml-5 mt-2 pl-4 space-y-2">
-                                            {/* Animated Vertical Line */}
+                                            {/* Animated Root Line */}
                                             <motion.div
                                                 initial={{ scaleY: 0 }}
                                                 animate={{ scaleY: 1 }}
                                                 transition={{ duration: 0.5, ease: "circOut" }}
-                                                className="absolute left-0 top-0 bottom-0 w-[2px] bg-border/70 origin-top"
+                                                className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-amber-700/20 to-amber-700/5 dark:from-amber-500/20 dark:to-transparent rounded-b-full origin-top"
                                             />
                                             {childBranches
                                                 .filter((b) => b.parentBranchId === mainBranch.id)
@@ -253,25 +256,25 @@ const BranchNode = memo(function BranchNode({
                         initial={{ pathLength: 0 }}
                         animate={{ pathLength: 1 }}
                         transition={{ duration: 0.6, delay: index * 0.05, ease: "easeInOut" }}
-                        d="M 0,-16 C 0,16 16,16 20,16"
+                        d="M 0,-16 C 0,16 5,16 20,16"
                         stroke="currentColor"
-                        strokeWidth="1.5"
+                        strokeWidth="2"
                         strokeLinecap="round"
-                        className="text-border/80 dark:text-border/60"
+                        className="text-amber-700/30 dark:text-amber-500/20"
                     />
                 </svg>
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => onSelectBranch(branch.id)}
                         className={cn(
-                            "flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all text-sm group/btn relative overflow-hidden",
+                            "flex-1 flex items-center gap-2 px-3 py-2 rounded-tl-[1.2rem] rounded-br-[1.2rem] rounded-tr-md rounded-bl-md text-left transition-all text-sm group/btn relative overflow-hidden border",
                             isActive
-                                ? "bg-white dark:bg-zinc-900 shadow-sm border border-border text-foreground ring-1 ring-border/10"
-                                : "hover:bg-zinc-100/50 dark:hover:bg-zinc-900/50 border border-transparent text-muted-foreground hover:text-foreground"
+                                ? "bg-amber-100 dark:bg-amber-900/30 shadow-sm border border-amber-300 dark:border-amber-700/50 text-amber-900 dark:text-amber-100"
+                                : "hover:bg-amber-50 dark:hover:bg-amber-900/10 border-transparent text-muted-foreground hover:text-foreground"
                         )}
                     >
-                        <BranchIcon className={cn("h-3.5 w-3.5 shrink-0", branch.isMerged ? "text-purple-400" : "opacity-70")} />
-                        <span className={cn("font-sans truncate text-xs flex-1", branch.isMerged && "text-muted-foreground line-through")}>
+                        <BranchIcon className={cn("h-3.5 w-3.5 shrink-0 transition-opacity", isActive ? "text-amber-600 dark:text-amber-400" : branch.isMerged ? "text-purple-400" : "opacity-50")} />
+                        <span className={cn("font-sans truncate text-xs flex-1", branch.isMerged && "text-muted-foreground line-through opacity-60")}>
                             {branchLabel}
                         </span>
                     </button>
@@ -319,12 +322,12 @@ const BranchNode = memo(function BranchNode({
             <AnimatePresence mode="popLayout">
                 {childBranches.length > 0 && depth < 3 && (
                     <div className="relative ml-4 mt-1 pl-3 space-y-1">
-                        {/* Animated Vertical Line */}
+                        {/* Animated Root Line */}
                         <motion.div
                             initial={{ scaleY: 0 }}
                             animate={{ scaleY: 1 }}
                             transition={{ duration: 0.5, delay: index * 0.05, ease: "circOut" }}
-                            className="absolute left-0 top-0 bottom-0 w-[2px] bg-border/70 origin-top"
+                            className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-amber-700/20 to-amber-700/5 dark:from-amber-500/20 dark:to-transparent rounded-b-full origin-top"
                         />
                         {childBranches.map((child, i) => (
                             <BranchNode
