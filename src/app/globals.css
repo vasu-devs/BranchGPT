@@ -52,7 +52,8 @@
   --muted-foreground: #718096;
 
   --border: #e2e0d5;
-  --primary: #4a7c59; /* Sage/Forest Green */
+  --primary: #4a7c59;
+  /* Sage/Forest Green */
   --primary-foreground: #ffffff;
 
   --secondary: #eeeae0;
@@ -64,7 +65,8 @@
 
   /* Matte Finish Variables - ORGANIC */
   --matte-bg: #fdfbf7;
-  --matte-shadow: rgba(85, 95, 80, 0.08); /* Organic shadow hue */
+  --matte-shadow: rgba(85, 95, 80, 0.08);
+  /* Organic shadow hue */
   --matte-border: #e2e0d5;
 
   /* Textures */
@@ -80,7 +82,8 @@
   --muted-foreground: #a0aec0;
 
   --border: #383c34;
-  --primary: #5c916e; /* Lighter sage for contrast */
+  --primary: #5c916e;
+  /* Lighter sage for contrast */
   --primary-foreground: #ffffff;
 
   --secondary: #272a25;
@@ -116,7 +119,7 @@
     z-index: -1;
     mix-blend-mode: multiply;
   }
-  
+
   .dark body::before {
     mix-blend-mode: overlay;
     opacity: 0.03;
@@ -270,15 +273,15 @@
 }
 
 .prose h1 {
-  @apply text-2xl font-bold mt-6 mb-4 text-slate-900 dark:text-slate-100;
+  @apply text-xl md:text-2xl font-bold mt-6 mb-4 text-slate-900 dark:text-slate-100;
 }
 
 .prose h2 {
-  @apply text-xl font-semibold mt-5 mb-3 text-slate-900 dark:text-slate-100;
+  @apply text-lg md:text-xl font-semibold mt-5 mb-3 text-slate-900 dark:text-slate-100;
 }
 
 .prose h3 {
-  @apply text-lg font-semibold mt-4 mb-2 text-slate-900 dark:text-slate-100;
+  @apply text-base md:text-lg font-semibold mt-4 mb-2 text-slate-900 dark:text-slate-100;
 }
 
 .prose p {

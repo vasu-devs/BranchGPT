@@ -91,7 +91,7 @@ export const MessageBubble = React.memo(function MessageBubble({
             >
                 <div className="max-w-[85%]">
                     <div className="matte bg-amber-100/40  px-5 py-4 rounded-tl-[1.8rem] rounded-br-[1.8rem] rounded-tr-sm rounded-bl-sm relative overflow-hidden shadow-sm border border-amber-500/10">
-                        <div className="prose  max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 leading-relaxed font-sans relative z-10">
+                        <div className="prose text-[15px] md:text-base max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 leading-relaxed font-sans relative z-10">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {message.content}
                             </ReactMarkdown>
@@ -185,7 +185,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                         </div>
                     ) : (
                         <div className={cn(
-                            "text-base leading-relaxed p-5 rounded-tr-[1.8rem] rounded-bl-[1.8rem] rounded-tl-sm rounded-br-sm glass-card transition-all duration-300 bg-white/60  shadow-sm border border-border/60",
+                            "text-[15px] md:text-base leading-relaxed p-5 rounded-tr-[1.8rem] rounded-bl-[1.8rem] rounded-tl-sm rounded-br-sm glass-card transition-all duration-300 bg-white/60  shadow-sm border border-border/60",
                             message.role === "system" ? "text-amber-800/90  italic font-medium border-amber-500/20" : "",
                             isStreaming && "transition-none shadow-none"
                         )}>

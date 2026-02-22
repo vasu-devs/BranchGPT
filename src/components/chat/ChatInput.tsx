@@ -81,7 +81,7 @@ export function ChatInput({
                         placeholder={placeholder}
                         rows={1}
                         disabled={disabled}
-                        className="w-full bg-transparent border-none focus:ring-0 resize-none py-2.5 px-4 text-base placeholder:text-muted-foreground/60 transition-all text-foreground font-sans scroll-smooth relative z-10"
+                        className="w-full bg-transparent border-none focus:ring-0 resize-none py-2.5 px-4 text-[15px] md:text-base placeholder:text-muted-foreground/60 transition-all text-foreground font-sans scroll-smooth relative z-10"
                     />
                     <AnimatePresence>
                         {input.length > 0 && isFocused && (
