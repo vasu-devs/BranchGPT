@@ -850,7 +850,12 @@ export default function ChatPage() {
                     </SheetContent>
                 </Sheet>
 
-                <span className="font-semibold text-sm">BranchGPT</span>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-md bg-amber-500/10 flex items-center justify-center p-0.5">
+                        <img src="/logo.png" alt="BranchGPT Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                    </div>
+                    <span className="font-bold tracking-tight text-sm font-serif">BranchGPT</span>
+                </div>
 
                 <Sheet>
                     <SheetTrigger asChild>

@@ -91,7 +91,7 @@ export function ChatInput({
                                 exit={{ opacity: 0, scale: 0.9, x: 10 }}
                                 className="absolute right-2 bottom-4 pointer-events-none z-20"
                             >
-                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-slate-100  border border-slate-200  text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
                                     <Command className="h-2.5 w-2.5" />
                                     <span>Enter</span>
                                 </div>
@@ -117,10 +117,10 @@ export function ChatInput({
                     href="https://vasudev.live"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all flex items-center gap-2 px-5 py-2 rounded-full border border-slate-200/30 dark:border-slate-800/30 bg-white/5 dark:bg-black/5 backdrop-blur-md"
+                    className="text-xs font-semibold text-slate-400 hover:text-slate-600 :text-slate-200 transition-all flex items-center gap-2 px-5 py-2 rounded-full border border-slate-200/30  bg-white/5  backdrop-blur-md"
                 >
                     <span className="opacity-60">Handcrafted by</span>
-                    <span className="tracking-tight text-slate-900 dark:text-slate-100 font-bold">Vasu-DevS</span>
+                    <span className="tracking-tight text-slate-900  font-bold">Vasu-DevS</span>
                 </motion.a>
             </div>
         </div>

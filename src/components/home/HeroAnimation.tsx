@@ -74,7 +74,7 @@ export function HeroAnimation() {
     return (
         <div className="relative w-full max-w-2xl mx-auto h-[380px] flex items-end justify-center pointer-events-none pb-12 mt-4">
             {/* Ambient Background Glow */}
-            <div className="absolute bottom-10 w-96 h-40 bg-primary/5 dark:bg-primary/10 blur-[80px] rounded-[100%]" />
+            <div className="absolute bottom-10 w-96 h-40 bg-primary/5  blur-[80px] rounded-[100%]" />
 
             <svg
                 width="100%"
@@ -84,13 +84,38 @@ export function HeroAnimation() {
                 xmlns="http://www.w3.org/2000/svg"
                 className="overflow-visible"
             >
+                {/* --- AMBIENT SPORES --- */}
+                <g className="opacity-40">
+                    {[...Array(8)].map((_, i) => (
+                        <motion.circle
+                            key={i}
+                            cx={100 + Math.random() * 400}
+                            cy={300 + Math.random() * 100}
+                            r={Math.random() * 2 + 1}
+                            className="fill-amber-300 "
+                            initial={{ y: 0, opacity: 0 }}
+                            animate={{
+                                y: -200 - Math.random() * 100,
+                                opacity: [0, 0.8, 0],
+                                x: (Math.random() - 0.5) * 50
+                            }}
+                            transition={{
+                                duration: 8 + Math.random() * 5,
+                                repeat: Infinity,
+                                ease: "linear",
+                                delay: Math.random() * 5
+                            }}
+                        />
+                    ))}
+                </g>
+
                 {/* --- SOIL / GROUND LINE --- */}
                 <motion.path
                     d="M 150 350 C 250 345, 350 345, 450 350"
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    className="text-border dark:text-border/60"
+                    className="text-border "
                     initial={{ pathLength: 0, opacity: 0 }}
                     animate={{ pathLength: 1, opacity: 1 }}
                     transition={{ duration: 1, ease: "easeOut" }}
@@ -103,7 +128,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="3"
                     strokeLinecap="round"
-                    className="text-amber-800/40 dark:text-amber-700/50"
+                    className="text-amber-800/40 "
                     variants={rootVariants}
                     initial="hidden"
                     animate={step >= 1 ? "visible" : "hidden"}
@@ -114,7 +139,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    className="text-amber-800/40 dark:text-amber-700/50"
+                    className="text-amber-800/40 "
                     variants={rootVariants}
                     initial="hidden"
                     animate={step >= 1 ? "visible" : "hidden"}
@@ -126,7 +151,7 @@ export function HeroAnimation() {
                     cy="350"
                     r="6"
                     fill="currentColor"
-                    className="text-amber-600 dark:text-amber-500"
+                    className="text-amber-600 "
                     variants={dropIn}
                     initial="hidden"
                     animate={step >= 1 ? "visible" : "hidden"}
@@ -138,7 +163,7 @@ export function HeroAnimation() {
                             x="300"
                             y="330"
                             textAnchor="middle"
-                            className="fill-amber-600/80 dark:fill-amber-500/80 font-sans text-xs font-bold uppercase tracking-[0.2em]"
+                            className="fill-amber-600/80  font-sans text-xs font-bold uppercase tracking-[0.2em]"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
@@ -155,7 +180,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="14"
                     strokeLinecap="round"
-                    className="text-stone-800 dark:text-stone-300"
+                    className="text-stone-800 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 2 ? "visible" : "hidden"}
@@ -166,7 +191,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="6"
                     strokeLinecap="round"
-                    className="text-stone-600 dark:text-stone-500"
+                    className="text-stone-600 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 2 ? "visible" : "hidden"}
@@ -178,7 +203,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="8"
                     strokeLinecap="round"
-                    className="text-stone-700 dark:text-stone-400"
+                    className="text-stone-700 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 2 ? "visible" : "hidden"}
@@ -190,7 +215,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="10"
                     strokeLinecap="round"
-                    className="text-stone-800 dark:text-stone-300"
+                    className="text-stone-800 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 2 ? "visible" : "hidden"}
@@ -220,7 +245,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="4"
                     strokeLinecap="round"
-                    className="text-stone-600 dark:text-stone-500"
+                    className="text-stone-600 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 3 ? "visible" : "hidden"}
@@ -231,7 +256,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="6"
                     strokeLinecap="round"
-                    className="text-stone-700 dark:text-stone-400"
+                    className="text-stone-700 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 3 ? "visible" : "hidden"}
@@ -242,7 +267,7 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="5"
                     strokeLinecap="round"
-                    className="text-stone-600 dark:text-stone-500"
+                    className="text-stone-600 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 3 ? "visible" : "hidden"}
@@ -253,7 +278,21 @@ export function HeroAnimation() {
                     stroke="currentColor"
                     strokeWidth="4"
                     strokeLinecap="round"
-                    className="text-stone-600 dark:text-stone-500"
+                    className="text-stone-600 "
+                    variants={pathVariants}
+                    initial="hidden"
+                    animate={step >= 3 ? "visible" : "hidden"}
+                />
+
+                {/* --- MERGING BRANCH --- */}
+                {/* A branch that curves out from the left and merges back into the center top branch */}
+                <motion.path
+                    d="M 140 160 C 150 110, 200 90, 250 40"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeDasharray="4 4"
+                    className="text-amber-500/60 "
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 3 ? "visible" : "hidden"}
@@ -264,35 +303,38 @@ export function HeroAnimation() {
                 {step >= 4 && (
                     <>
                         {/* Leaf Cluster Left Far */}
-                        <motion.path d="M 80 120 Q 90 90, 60 85 Q 50 110, 80 120 Z" fill="currentColor" className="text-primary/70 dark:text-primary/50" variants={popup} initial="hidden" animate="visible" />
-                        <motion.path d="M 80 120 Q 50 130, 65 150 Q 90 140, 80 120 Z" fill="currentColor" className="text-primary/90 dark:text-primary/70" variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 80 120 Q 90 90, 60 85 Q 50 110, 80 120 Z" fill="currentColor" className="text-primary/70 " variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 80 120 Q 50 130, 65 150 Q 90 140, 80 120 Z" fill="currentColor" className="text-primary/90 " variants={popup} initial="hidden" animate="visible" />
 
                         {/* Leaf Cluster Left Mid */}
-                        <motion.path d="M 140 160 Q 130 130, 100 125 Q 100 155, 140 160 Z" fill="currentColor" className="text-secondary dark:text-green-800" variants={popup} initial="hidden" animate="visible" />
-                        <motion.path d="M 140 160 Q 160 120, 145 100 Q 120 130, 140 160 Z" fill="currentColor" className="text-primary/80 dark:text-primary/60" variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 140 160 Q 130 130, 100 125 Q 100 155, 140 160 Z" fill="currentColor" className="text-secondary " variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 140 160 Q 160 120, 145 100 Q 120 130, 140 160 Z" fill="currentColor" className="text-primary/80 " variants={popup} initial="hidden" animate="visible" />
 
                         {/* Leaf Cluster Top High */}
-                        <motion.path d="M 250 40 Q 220 30, 210 50 Q 230 70, 250 40 Z" fill="currentColor" className="text-secondary dark:text-secondary-foreground" variants={popup} initial="hidden" animate="visible" />
-                        <motion.path d="M 250 40 Q 270 10, 290 20 Q 280 50, 250 40 Z" fill="currentColor" className="text-primary/90 dark:text-primary/80" variants={popup} initial="hidden" animate="visible" />
-                        <motion.path d="M 250 40 Q 230 10, 210 15 Q 210 35, 250 40 Z" fill="currentColor" className="text-primary/60 dark:text-primary/40" variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 250 40 Q 220 30, 210 50 Q 230 70, 250 40 Z" fill="currentColor" className="text-secondary " variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 250 40 Q 270 10, 290 20 Q 280 50, 250 40 Z" fill="currentColor" className="text-primary/90 " variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 250 40 Q 230 10, 210 15 Q 210 35, 250 40 Z" fill="currentColor" className="text-primary/60 " variants={popup} initial="hidden" animate="visible" />
 
                         {/* Leaf Cluster Mid Right High */}
-                        <motion.path d="M 450 60 Q 430 30, 460 25 Q 480 40, 450 60 Z" fill="currentColor" className="text-primary/80 dark:text-primary/60" variants={popup} initial="hidden" animate="visible" />
-                        <motion.path d="M 450 60 Q 480 50, 490 70 Q 460 90, 450 60 Z" fill="currentColor" className="text-secondary dark:text-green-800" variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 450 60 Q 430 30, 460 25 Q 480 40, 450 60 Z" fill="currentColor" className="text-primary/80 " variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 450 60 Q 480 50, 490 70 Q 460 90, 450 60 Z" fill="currentColor" className="text-secondary " variants={popup} initial="hidden" animate="visible" />
 
                         {/* Leaf Cluster Right Low */}
-                        <motion.path d="M 530 140 Q 560 120, 570 140 Q 550 170, 530 140 Z" fill="currentColor" className="text-primary/70 dark:text-primary/50" variants={popup} initial="hidden" animate="visible" />
-                        <motion.path d="M 530 140 Q 550 100, 530 90 Q 500 110, 530 140 Z" fill="currentColor" className="text-secondary dark:text-secondary-foreground" variants={popup} initial="hidden" animate="visible" />
-                        <motion.path d="M 530 140 Q 510 160, 500 180 Q 530 170, 530 140 Z" fill="currentColor" className="text-primary/90 dark:text-primary/80" variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 530 140 Q 560 120, 570 140 Q 550 170, 530 140 Z" fill="currentColor" className="text-primary/70 " variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 530 140 Q 550 100, 530 90 Q 500 110, 530 140 Z" fill="currentColor" className="text-secondary " variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 530 140 Q 510 160, 500 180 Q 530 170, 530 140 Z" fill="currentColor" className="text-primary/90 " variants={popup} initial="hidden" animate="visible" />
 
                         {/* Center Filler Leaves */}
-                        <motion.path d="M 370 145 Q 390 120, 360 100 Q 330 130, 370 145 Z" fill="currentColor" className="text-primary/60 dark:text-primary/40" variants={popup} initial="hidden" animate="visible" />
+                        <motion.path d="M 370 145 Q 390 120, 360 100 Q 330 130, 370 145 Z" fill="currentColor" className="text-primary/60 " variants={popup} initial="hidden" animate="visible" />
 
                         {/* Glowing "Thought Fruits" (Glowing Orbs) */}
-                        <motion.circle cx="105" cy="140" r="6" fill="currentColor" className="text-amber-400 dark:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" variants={popup} initial="hidden" animate="visible" />
-                        <motion.circle cx="240" cy="35" r="8" fill="currentColor" className="text-orange-400 dark:text-orange-400 drop-shadow-[0_0_12px_rgba(251,146,60,0.8)]" variants={popup} initial="hidden" animate="visible" />
-                        <motion.circle cx="475" cy="65" r="5" fill="currentColor" className="text-amber-500 dark:text-amber-500 drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]" variants={popup} initial="hidden" animate="visible" />
-                        <motion.circle cx="535" cy="120" r="7" fill="currentColor" className="text-yellow-400 dark:text-yellow-300 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" variants={popup} initial="hidden" animate="visible" />
+                        <motion.circle cx="105" cy="140" r="6" fill="currentColor" className="text-amber-400  drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" variants={popup} initial="hidden" animate="visible" />
+                        <motion.circle cx="240" cy="35" r="8" fill="currentColor" className="text-orange-400  drop-shadow-[0_0_12px_rgba(251,146,60,0.8)]" variants={popup} initial="hidden" animate="visible" />
+                        <motion.circle cx="475" cy="65" r="5" fill="currentColor" className="text-amber-500  drop-shadow-[0_0_6px_rgba(245,158,11,0.8)]" variants={popup} initial="hidden" animate="visible" />
+                        <motion.circle cx="535" cy="120" r="7" fill="currentColor" className="text-yellow-400  drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]" variants={popup} initial="hidden" animate="visible" />
+
+                        {/* Merged Idea Fruit */}
+                        <motion.circle cx="250" cy="40" r="10" fill="currentColor" className="text-purple-400  drop-shadow-[0_0_15px_rgba(192,132,252,0.8)]" variants={popup} initial="hidden" animate="visible" />
                     </>
                 )}
 

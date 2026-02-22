@@ -101,34 +101,34 @@ export function ChatView({
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto technical-scroll scroll-smooth"
             >
-                <div className="max-w-3xl mx-auto px-6 py-8">
+                <div className="max-w-5xl mx-auto px-6 py-8">
                     {messages.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="flex flex-col items-center justify-center min-h-[75vh] text-center max-w-3xl mx-auto"
+                            className="flex flex-col items-center justify-center min-h-[75vh] text-center max-w-5xl mx-auto px-4"
                         >
                             <motion.div
                                 animate={{ y: [0, -10, 0] }}
                                 transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                                className="w-20 h-20 rounded-[40%] bg-amber-100/50 dark:bg-amber-900/20 backdrop-blur-md flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.2)] border border-amber-500/30"
+                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-[40%] bg-amber-100/50  backdrop-blur-md flex items-center justify-center mb-3 sm:mb-3 shadow-[0_0_40px_rgba(245,158,11,0.2)] border border-amber-500/30"
                             >
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-amber-600 dark:text-amber-500">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-amber-600  sm:w-10 sm:h-10">
                                     <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.43 4 16.05 4 12C4 7.95 7.05 4.57 11 4.07V19.93ZM13 4.07C16.95 4.57 20 7.95 20 12C20 16.05 16.95 19.43 13 19.93V4.07Z" fill="currentColor" fillOpacity="0.2" />
                                     <path d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2V22Z" fill="currentColor" />
                                 </svg>
                             </motion.div>
 
-                            <h2 className="text-5xl md:text-6xl font-black tracking-tighter text-foreground mb-4 pb-1 font-serif">
+                            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-foreground mb-2 sm:mb-4 pb-1 font-serif">
                                 Plant a Seed.
                             </h2>
-                            <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed mb-6 font-medium">
+                            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed mb-4 sm:mb-6 font-medium px-4">
                                 Human intelligence isn't linear. It forks, roots, and flourishes.
-                                <span className="block mt-2 text-foreground/80 font-bold tracking-wide">Grow your ideas organically.</span>
+                                <span className="block mt-1 sm:mt-2 text-foreground/80 font-bold tracking-wide">Grow your ideas organically.</span>
                             </p>
 
-                            <div className="w-full mb-10 -mt-2">
+                            <div className="w-full mb-6 sm:mb-8 -mt-2">
                                 <HeroAnimation />
                             </div>
 
@@ -141,7 +141,7 @@ export function ChatView({
                             </div>
 
                             <div className="flex flex-col items-center gap-5 w-full">
-                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700/60 dark:text-amber-500/60">Or cultivate these paths</p>
+                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-amber-700/60 ">Or cultivate these paths</p>
                                 <div className="flex flex-wrap justify-center gap-4 w-full max-w-2xl px-4">
                                     {[
                                         { title: "Quantum Entanglement", icon: "✨" },
@@ -156,7 +156,7 @@ export function ChatView({
                                             whileTap={{ scale: 0.95 }}
                                             key={starter.title}
                                             onClick={() => onSendMessage(starter.title)}
-                                            className="px-5 py-3 rounded-[2rem] text-sm font-semibold flex items-center gap-3 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-md border border-border/80 hover:border-amber-500/50 text-foreground hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-700 dark:hover:text-amber-400 transition-all duration-300 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(245,158,11,0.15)]"
+                                            className="px-5 py-3 rounded-[2rem] text-sm font-semibold flex items-center gap-3 bg-white/80  backdrop-blur-md border border-border/80 hover:border-amber-500/50 text-foreground hover:bg-amber-50 :bg-amber-900/20 hover:text-amber-700 :text-amber-400 transition-all duration-300 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(245,158,11,0.15)]"
                                         >
                                             <span className="text-lg">{starter.icon}</span>
                                             {starter.title}
@@ -242,13 +242,15 @@ export function ChatView({
                         initial={{ y: 100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 100, opacity: 0 }}
-                        className="bg-gradient-to-t from-background via-background/80 to-transparent pt-10 pb-2"
+                        className="shrink-0 p-4 border-t border-white/5 bg-background/80 backdrop-blur-xl relative z-20"
                     >
-                        <ChatInput
-                            onSend={onSendMessage}
-                            disabled={isLoading}
-                            placeholder={isLoading ? "Thinking..." : "Continue the branch..."}
-                        />
+                        <div className="max-w-5xl mx-auto w-full relative">
+                            <ChatInput
+                                onSend={onSendMessage}
+                                disabled={isLoading}
+                                placeholder={isLoading ? "Thinking..." : "Continue the branch..."}
+                            />
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -268,11 +270,11 @@ export function ChatView({
                         </DialogDescription>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto technical-scroll min-h-0 space-y-6 px-6 py-2">
+                    <div className="flex-1 w-full max-w-5xl mx-auto flex flex-col pt-4 overflow-y-auto min-h-0 relative z-10 scroll-smooth">
                         {forkSourceContent && (
-                            <div className="rounded-xl bg-zinc-100/50 dark:bg-zinc-800/50 p-4 border border-border/50">
+                            <div className="rounded-xl bg-zinc-100/50  p-4 border border-border/50">
                                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 font-bold">Source Context</p>
-                                <div className="text-sm text-foreground/80 prose prose-xs prose-neutral dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <div className="text-sm text-foreground/80 prose prose-xs prose-neutral  max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                         {forkSourceContent}
                                     </ReactMarkdown>
@@ -294,7 +296,7 @@ export function ChatView({
                     </div>
 
                     <DialogFooter className="p-6 pt-2 border-t border-border/40">
-                        <Button variant="outline" onClick={() => setForkModalOpen(false)} className="rounded-xl border-border hover:bg-secondary btn-3d bg-white dark:bg-zinc-900">
+                        <Button variant="outline" onClick={() => setForkModalOpen(false)} className="rounded-xl border-border hover:bg-secondary btn-3d bg-white ">
                             Cancel
                         </Button>
                         <Button onClick={handleForkSubmit} disabled={!forkContent.trim()} className="rounded-xl btn-3d-primary font-medium">

@@ -1,4 +1,3 @@
-import { ThemeToggle } from "@/components/theme-toggle";
 import { HelpDialog } from "./HelpDialog";
 import { Button } from "@/components/ui/button";
 import { PanelCloseIcon } from "@/components/icons/PanelCloseIcon";
@@ -83,8 +82,8 @@ export function Sidebar({
                                     exit={{ opacity: 0 }}
                                     className="flex items-center gap-3 overflow-hidden"
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center shrink-0 shadow-lg">
-                                        <div className="w-4 h-4 bg-background rounded-full" />
+                                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center p-0.5 shrink-0 shadow-inner border border-amber-500/20">
+                                        <img src="/logo.png" alt="BranchGPT Logo" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                                     </div>
                                     <span className="font-semibold text-lg tracking-tight whitespace-nowrap bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">BranchGPT</span>
                                 </motion.div>
@@ -95,7 +94,7 @@ export function Sidebar({
                             size="icon"
                             asChild
                             onClick={onToggleCollapse}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-zinc-100/50 :bg-zinc-800/50"
                         >
                             <motion.button whileHover={{ scale: 1.1, rotate: isCollapsed ? 0 : 90 }} whileTap={{ scale: 0.9 }}>
                                 {isCollapsed ? <PanelIcon className="h-4 w-4" /> : <PanelCloseIcon className="h-4 w-4" />}
@@ -110,14 +109,14 @@ export function Sidebar({
                         onClick={onNewChat}
                         asChild
                         className={cn(
-                            "w-full h-10 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-foreground font-medium transition-all relative overflow-hidden group border border-border/50 shadow-sm hover:shadow-md",
+                            "w-full h-10 bg-white  hover:bg-zinc-50 :bg-zinc-800 text-foreground font-medium transition-all relative overflow-hidden group border border-border/50 shadow-sm hover:shadow-md",
                             isCollapsed ? "px-0 justify-center" : "justify-start gap-3"
                         )}
                     >
                         <motion.button
                             whileTap={{ scale: 0.98 }}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/10 dark:via-zinc-800/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/10  to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                             <PlusIcon className="h-4 w-4 shrink-0 transition-transform group-hover:rotate-90 duration-300" />
                             {!isCollapsed && <span>New Chat</span>}
                         </motion.button>
@@ -174,7 +173,7 @@ export function Sidebar({
                                             {currentBranchId === branch.id && (
                                                 <motion.div
                                                     layoutId="activeSidebarTabBackground"
-                                                    className="absolute inset-0 bg-primary/95 dark:bg-zinc-800 rounded-xl -z-10 shadow-sm border border-black/5 dark:border-white/5"
+                                                    className="absolute inset-0 bg-primary/95  rounded-xl -z-10 shadow-sm border border-black/5 "
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -189,7 +188,7 @@ export function Sidebar({
                                             )}>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50">
+                                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-zinc-200/50 :bg-zinc-800/50">
                                                             <MoreIcon className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
@@ -218,7 +217,7 @@ export function Sidebar({
                 {/* User/Footer */}
                 <div className="p-4 border-t border-border/50">
                     <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
-                        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 shrink-0" />
+                        <div className="w-8 h-8 rounded-full bg-slate-200  shrink-0" />
                         {!isCollapsed && (
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium">User</p>
@@ -227,7 +226,6 @@ export function Sidebar({
                         )}
                         <div className="flex items-center gap-1">
                             {!isCollapsed && <HelpDialog />}
-                            {!isCollapsed && <ThemeToggle />}
                         </div>
                     </div>
                 </div>

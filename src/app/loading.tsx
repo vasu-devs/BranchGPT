@@ -8,7 +8,7 @@ export default function Loading() {
                     <div className="h-12 w-full glass-card animate-pulse shadow-sm" />
                     <div className="space-y-4 pt-4">
                         {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="h-10 w-full bg-slate-200/20 dark:bg-slate-800/20 rounded-xl animate-pulse" />
+                            <div key={i} className="h-10 w-full bg-slate-200/20  rounded-xl animate-pulse" />
                         ))}
                     </div>
                 </div>
@@ -45,7 +45,7 @@ export default function Loading() {
                 <div className="p-6 space-y-6">
                     {[1, 2, 3, 4].map((i) => (
                         <div key={i} className="flex items-center gap-4">
-                            <div className="w-3 h-3 rounded-full bg-slate-300/30 dark:bg-slate-700/30 animate-pulse" />
+                            <div className="w-3 h-3 rounded-full bg-slate-300/30  animate-pulse" />
                             <div className="h-5 w-32 glass-card animate-pulse rounded-lg opacity-40" />
                         </div>
                     ))}

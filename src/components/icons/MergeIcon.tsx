@@ -11,7 +11,7 @@ export function MergeIcon({ className }: { className?: string }) {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={cn("h-4 w-4 text-amber-600 dark:text-amber-500", className)}
+            className={cn("h-4 w-4 text-amber-600 ", className)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
         >
