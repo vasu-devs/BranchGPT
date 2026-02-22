@@ -44,53 +44,55 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
+  /* Earthy Light Mode (Sand / warm paper) */
+  --background: #fdfbf7;
+  --foreground: #2d3748;
 
-  --muted: #f9fafb;
-  --muted-foreground: #6b7280;
+  --muted: #f4f1ea;
+  --muted-foreground: #718096;
 
-  --border: #e5e7eb;
-  --primary: #2563eb;
+  --border: #e2e0d5;
+  --primary: #4a7c59; /* Sage/Forest Green */
   --primary-foreground: #ffffff;
 
-  --secondary: #f3f4f6;
-  --secondary-foreground: #111827;
+  --secondary: #eeeae0;
+  --secondary-foreground: #2d3748;
 
-  --sidebar: #ffffff;
-  --sidebar-foreground: #111827;
-  --sidebar-border: #e5e7eb;
+  --sidebar: #f7f4ec;
+  --sidebar-foreground: #2d3748;
+  --sidebar-border: #e2e0d5;
 
-  /* Matte Finish Variables - CLEAN */
-  --matte-bg: #ffffff;
-  --matte-shadow: rgba(0, 0, 0, 0.05);
-  --matte-border: #e5e7eb;
+  /* Matte Finish Variables - ORGANIC */
+  --matte-bg: #fdfbf7;
+  --matte-shadow: rgba(85, 95, 80, 0.08); /* Organic shadow hue */
+  --matte-border: #e2e0d5;
 
   /* Textures */
-  --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
 .dark {
-  --background: #09090b;
-  --foreground: #fafafa;
+  /* Earthy Dark Mode (Deep bark / forest shadow) */
+  --background: #1a1c19;
+  --foreground: #e2e8f0;
 
-  --muted: #18181b;
-  --muted-foreground: #a1a1aa;
+  --muted: #272a25;
+  --muted-foreground: #a0aec0;
 
-  --border: #27272a;
-  --primary: #3b82f6;
+  --border: #383c34;
+  --primary: #5c916e; /* Lighter sage for contrast */
   --primary-foreground: #ffffff;
 
-  --secondary: #18181b;
-  --secondary-foreground: #fafafa;
+  --secondary: #272a25;
+  --secondary-foreground: #e2e8f0;
 
-  --sidebar: #09090b;
-  --sidebar-foreground: #fafafa;
-  --sidebar-border: #27272a;
+  --sidebar: #161815;
+  --sidebar-foreground: #e2e8f0;
+  --sidebar-border: #383c34;
 
-  --matte-bg: #0c0c0e;
-  --matte-shadow: rgba(0, 0, 0, 0.4);
-  --matte-border: #27272a;
+  --matte-bg: #1e211d;
+  --matte-shadow: rgba(0, 0, 0, 0.5);
+  --matte-border: #383c34;
 }
 
 @layer base {
@@ -103,42 +105,48 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Fixed Textures - Background Layer */
+  /* Fixed Textures - Background Layer (Paper/Dirt texture) */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     background: var(--noise);
-    opacity: 0.03;
+    opacity: 0.05;
     pointer-events: none;
     z-index: -1;
+    mix-blend-mode: multiply;
+  }
+  
+  .dark body::before {
     mix-blend-mode: overlay;
+    opacity: 0.03;
   }
 
+  /* Soft organic dot pattern instead of harsh tech grid */
   body::after {
     content: "";
     position: fixed;
     inset: 0;
-    background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px);
-    background-size: 16px 16px;
-    opacity: 0.4;
+    background-image: radial-gradient(rgba(74, 124, 89, 0.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.6;
     pointer-events: none;
     z-index: -1;
   }
 
   .dark body::after {
-    background-image: radial-gradient(#1e293b 0.53px, transparent 0.53px);
-    opacity: 0.6;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    opacity: 1;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/40 dark:bg-black/40 backdrop-blur-3xl border border-white/20 dark:border-white/10 shadow-sm;
+    @apply bg-background/60 backdrop-blur-xl border border-border/50 shadow-sm;
   }
 
   .glass-card {
-    @apply bg-white/95 dark:bg-zinc-900/95 backdrop-blur-3xl border border-white dark:border-white/20 shadow-2xl rounded-2xl;
+    @apply bg-background/90 backdrop-blur-2xl border border-border shadow-lg rounded-2xl;
   }
 
   .glass-panel {

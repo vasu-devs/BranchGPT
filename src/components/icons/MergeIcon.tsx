@@ -11,27 +11,31 @@ export function MergeIcon({ className }: { className?: string }) {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={cn("h-4 w-4", className)}
+            className={cn("h-4 w-4 text-amber-600 dark:text-amber-500", className)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
         >
-            <motion.circle
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
-                cx="18" cy="18" r="3"
-            />
-            <motion.circle
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 20 }}
-                cx="6" cy="6" r="3"
-            />
+            {/* Left Root */}
             <motion.path
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
-                d="M6 9a9 9 0 0 0 9 9"
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                d="M5 5 C 5 10, 10 14, 12 18"
+            />
+            {/* Right Root */}
+            <motion.path
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+                d="M19 5 C 19 10, 14 14, 12 18"
+            />
+            {/* Merged Base Leaf/Node */}
+            <motion.path
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 20 }}
+                d="M12 18 C 9 21, 15 21, 12 18"
+                fill="currentColor"
             />
         </motion.svg>
     );

@@ -41,58 +41,36 @@ export function HeroAnimation() {
     };
 
     return (
-        <div className="relative w-full max-w-2xl mx-auto h-[300px] flex items-center justify-center pointer-events-none">
+        <div className="relative w-full max-w-2xl mx-auto h-[350px] flex items-end justify-center pointer-events-none pb-12">
             {/* Background Glow */}
-            <div className="absolute inset-0 bg-primary/5 dark:bg-primary/10 blur-3xl rounded-full" />
+            <div className="absolute bottom-0 w-64 h-32 bg-primary/10 dark:bg-primary/20 blur-[50px] rounded-full" />
 
             <svg
                 width="100%"
                 height="100%"
-                viewBox="0 0 600 300"
+                viewBox="0 0 600 400"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 className="overflow-visible"
             >
-                {/* 1. Linear Start - The initial thought */}
-                <motion.path
-                    d="M 50,150 L 250,150"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    className="text-muted-foreground/40"
-                    variants={pathVariants}
-                    initial="hidden"
-                    animate={step >= 1 ? "visible" : "hidden"}
-                />
-
+                {/* 1. The Seed / Base */}
                 <motion.circle
-                    cx="50"
-                    cy="150"
-                    r="6"
+                    cx="300"
+                    cy="350"
+                    r="5"
                     fill="currentColor"
-                    className="text-foreground"
+                    className="text-foreground/80 dark:text-foreground/60"
                     variants={nodeVariants}
                     initial="hidden"
                     animate={step >= 1 ? "visible" : "hidden"}
                 />
 
-                <motion.circle
-                    cx="250"
-                    cy="150"
-                    r="8"
-                    fill="currentColor"
-                    className="text-primary"
-                    variants={nodeVariants}
-                    initial="hidden"
-                    animate={step >= 1 ? "visible" : "hidden"}
-                />
-
-                {/* --- Text Label: "A single thought..." --- */}
+                {/* --- Text Label: "A single seed..." --- */}
                 <AnimatePresence>
                     {step === 1 && (
                         <motion.text
-                            x="150"
-                            y="135"
+                            x="300"
+                            y="380"
                             textAnchor="middle"
                             className="fill-muted-foreground font-sans text-xs font-medium uppercase tracking-widest"
                             initial={{ opacity: 0, y: 10 }}
@@ -104,23 +82,68 @@ export function HeroAnimation() {
                     )}
                 </AnimatePresence>
 
+                {/* 1. Trunk growing upwards */}
+                <motion.path
+                    d="M 300,350 C 300,280 290,240 300,200"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    className="text-foreground/70 dark:text-foreground/50"
+                    variants={pathVariants}
+                    initial="hidden"
+                    animate={step >= 1 ? "visible" : "hidden"}
+                />
+
+                <motion.circle
+                    cx="300"
+                    cy="200"
+                    r="4"
+                    fill="currentColor"
+                    className="text-primary"
+                    variants={nodeVariants}
+                    initial="hidden"
+                    animate={step >= 1 ? "visible" : "hidden"}
+                />
+
+
                 {/* 2. The Branching - Divergent possibilities */}
 
-                {/* Top Branch */}
+                {/* Left Branch */}
                 <motion.path
-                    d="M 250,150 C 350,150 350,70 450,70"
+                    d="M 300,200 C 280,150 200,120 150,130"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="3"
                     strokeLinecap="round"
-                    className="text-primary/70"
+                    className="text-amber-600/70 dark:text-amber-500/70"
+                    variants={pathVariants}
+                    initial="hidden"
+                    animate={step >= 2 ? "visible" : "hidden"}
+                />
+                {/* Leaf Left */}
+                <motion.path
+                    d="M 150,130 C 145,120 135,125 150,130"
+                    fill="currentColor"
+                    className="text-amber-600 dark:text-amber-500"
+                    variants={nodeVariants}
+                    initial="hidden"
+                    animate={step >= 2 ? "visible" : "hidden"}
+                />
+
+                {/* Middle Branch (Main) */}
+                <motion.path
+                    d="M 300,200 C 310,140 300,100 300,70"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    className="text-primary/80"
                     variants={pathVariants}
                     initial="hidden"
                     animate={step >= 2 ? "visible" : "hidden"}
                 />
                 <motion.circle
-                    cx="450"
+                    cx="300"
                     cy="70"
-                    r="6"
+                    r="4"
                     fill="currentColor"
                     className="text-primary"
                     variants={nodeVariants}
@@ -128,47 +151,14 @@ export function HeroAnimation() {
                     animate={step >= 2 ? "visible" : "hidden"}
                 />
 
-                {/* Middle (continued) Branch */}
+                {/* Right Branch */}
                 <motion.path
-                    d="M 250,150 L 500,150"
+                    d="M 300,200 C 320,160 400,140 450,110"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="3"
                     strokeLinecap="round"
-                    strokeDasharray="4 4"
-                    className="text-muted-foreground/30"
+                    className="text-primary/60"
                     variants={pathVariants}
-                    initial="hidden"
-                    animate={step >= 2 ? "visible" : "hidden"}
-                />
-                <motion.circle
-                    cx="500"
-                    cy="150"
-                    r="5"
-                    fill="currentColor"
-                    className="text-muted-foreground/50"
-                    variants={nodeVariants}
-                    initial="hidden"
-                    animate={step >= 2 ? "visible" : "hidden"}
-                />
-
-                {/* Bottom Branch */}
-                <motion.path
-                    d="M 250,150 C 350,150 350,230 450,230"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    className="text-amber-500/70"
-                    variants={pathVariants}
-                    initial="hidden"
-                    animate={step >= 2 ? "visible" : "hidden"}
-                />
-                <motion.circle
-                    cx="450"
-                    cy="230"
-                    r="6"
-                    fill="currentColor"
-                    className="text-amber-500"
-                    variants={nodeVariants}
                     initial="hidden"
                     animate={step >= 2 ? "visible" : "hidden"}
                 />
@@ -178,7 +168,7 @@ export function HeroAnimation() {
                     {step >= 2 && (
                         <motion.text
                             x="450"
-                            y="45"
+                            y="90"
                             textAnchor="middle"
                             className="fill-foreground font-sans text-xs font-bold uppercase tracking-widest"
                             initial={{ opacity: 0, y: 10 }}
@@ -189,9 +179,9 @@ export function HeroAnimation() {
                     )}
                 </AnimatePresence>
 
-                {/* 3. Further Expansion on Top Branch */}
+                {/* 3. Further Expansion on Right Branch */}
                 <motion.path
-                    d="M 450,70 L 550,40"
+                    d="M 450,110 C 470,90 500,80 520,70"
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -200,10 +190,9 @@ export function HeroAnimation() {
                     initial="hidden"
                     animate={step >= 3 ? "visible" : "hidden"}
                 />
-                <motion.circle
-                    cx="550"
-                    cy="40"
-                    r="4"
+                {/* Leaf Right Top */}
+                <motion.path
+                    d="M 520,70 C 525,60 535,65 520,70"
                     fill="currentColor"
                     className="text-primary/60"
                     variants={nodeVariants}
@@ -212,7 +201,7 @@ export function HeroAnimation() {
                 />
 
                 <motion.path
-                    d="M 450,70 L 550,100"
+                    d="M 450,110 C 480,130 500,140 520,160"
                     stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -221,10 +210,9 @@ export function HeroAnimation() {
                     initial="hidden"
                     animate={step >= 3 ? "visible" : "hidden"}
                 />
-                <motion.circle
-                    cx="550"
-                    cy="100"
-                    r="4"
+                {/* Leaf Right Bottom */}
+                <motion.path
+                    d="M 520,160 C 525,165 535,160 520,160"
                     fill="currentColor"
                     className="text-primary/60"
                     variants={nodeVariants}

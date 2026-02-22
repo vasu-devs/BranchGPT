@@ -109,16 +109,16 @@ export function ChatView({
                             exit={{ opacity: 0, scale: 0.95 }}
                             className="flex flex-col items-center justify-center min-h-[75vh] text-center max-w-3xl mx-auto"
                         >
-                            <div className="w-20 h-20 rounded-3xl matte flex items-center justify-center mb-6 shadow-xl border border-border/60 transition-transform duration-500 hover:rotate-6 bg-gradient-to-br from-background to-secondary/20">
-                                <BranchIcon className="h-10 w-10 text-primary drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]" />
+                            <div className="w-20 h-20 rounded-[2rem] matte flex items-center justify-center mb-6 shadow-md border border-border/40 transition-transform duration-500 hover:rotate-6 bg-white dark:bg-zinc-900">
+                                <BranchIcon className="h-10 w-10 text-primary drop-shadow-sm" />
                             </div>
 
-                            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/50 mb-4 pb-1">
+                            <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-foreground mb-4 pb-1">
                                 BranchGPT
                             </h2>
                             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed mb-6 font-medium">
-                                Human intelligence isn't a straight line. It forks, branches, and explores alternatives.
-                                <span className="block mt-2 text-foreground/80 font-semibold">Your AI should too.</span>
+                                Thoughts don't grow in a straight line. They take root, branch out, and flourish.
+                                <span className="block mt-2 text-foreground/80 font-semibold">Your AI should grow with you.</span>
                             </p>
 
                             <div className="w-full mb-10 -mt-4">
@@ -129,7 +129,7 @@ export function ChatView({
                                 <ChatInput
                                     onSend={onSendMessage}
                                     disabled={isLoading}
-                                    placeholder="Start your first branch of thought..."
+                                    placeholder="Plant your first seed of thought..."
                                 />
                             </div>
 
@@ -138,9 +138,9 @@ export function ChatView({
                                 <div className="flex flex-wrap justify-center gap-3">
                                     {[
                                         "Explain quantum entanglement",
-                                        "How to build a SaaS in 2026?",
+                                        "How do trees communicate?",
                                         "Why is rust becoming so popular?",
-                                        "Write a poem about time travel"
+                                        "Write a poem about a quiet forest"
                                     ].map((starter, i) => (
                                         <motion.button
                                             initial={{ opacity: 0, y: 10 }}
