@@ -138,7 +138,7 @@ export function ChatView({
                                 <div className="flex flex-wrap justify-center gap-3">
                                     {[
                                         "Explain quantum entanglement",
-                                        "How to build a SaaS in 2024?",
+                                        "How to build a SaaS in 2026?",
                                         "Why is rust becoming so popular?",
                                         "Write a poem about time travel"
                                     ].map((starter, i) => (
