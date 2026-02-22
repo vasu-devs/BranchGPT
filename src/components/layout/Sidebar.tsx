@@ -37,14 +37,16 @@ interface SidebarProps {
 }
 
 const itemVariants: Variants = {
-    hidden: { opacity: 0, x: -10 },
+    hidden: { opacity: 0, x: -15, filter: "blur(4px)" },
     visible: (i: number) => ({
         opacity: 1,
         x: 0,
+        filter: "blur(0px)",
         transition: {
             delay: i * 0.05,
-            duration: 0.3,
-            ease: "easeOut"
+            type: "spring",
+            stiffness: 400,
+            damping: 30
         }
     })
 };
@@ -81,10 +83,10 @@ export function Sidebar({
                                     exit={{ opacity: 0 }}
                                     className="flex items-center gap-3 overflow-hidden"
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center shrink-0 shadow-lg">
                                         <div className="w-4 h-4 bg-background rounded-full" />
                                     </div>
-                                    <span className="font-semibold text-lg tracking-tight whitespace-nowrap">BranchGPT</span>
+                                    <span className="font-semibold text-lg tracking-tight whitespace-nowrap bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">BranchGPT</span>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -93,7 +95,7 @@ export function Sidebar({
                             size="icon"
                             asChild
                             onClick={onToggleCollapse}
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50"
                         >
                             <motion.button whileHover={{ scale: 1.1, rotate: isCollapsed ? 0 : 90 }} whileTap={{ scale: 0.9 }}>
                                 {isCollapsed ? <PanelIcon className="h-4 w-4" /> : <PanelCloseIcon className="h-4 w-4" />}
@@ -108,15 +110,15 @@ export function Sidebar({
                         onClick={onNewChat}
                         asChild
                         className={cn(
-                            "w-full h-10 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-foreground font-medium btn-3d transition-all relative overflow-hidden group border-border shadow-sm",
+                            "w-full h-10 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-foreground font-medium transition-all relative overflow-hidden group border border-border/50 shadow-sm hover:shadow-md",
                             isCollapsed ? "px-0 justify-center" : "justify-start gap-3"
                         )}
                     >
                         <motion.button
                             whileTap={{ scale: 0.98 }}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                            <PlusIcon className="h-4 w-4 shrink-0" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/10 dark:via-zinc-800/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                            <PlusIcon className="h-4 w-4 shrink-0 transition-transform group-hover:rotate-90 duration-300" />
                             {!isCollapsed && <span>New Chat</span>}
                         </motion.button>
                     </Button>
@@ -127,13 +129,13 @@ export function Sidebar({
                     <div className="space-y-1">
                         {!isCollapsed && (
                             <div className="px-3 py-2">
-                                <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                                <h3 className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest opacity-70">
                                     Recent Chats
                                 </h3>
                             </div>
                         )}
                         {branches.length === 0 && !isCollapsed ? (
-                            <p className="text-muted-foreground text-sm px-3 py-2">No conversations yet</p>
+                            <p className="text-muted-foreground text-sm px-3 py-2 italic opacity-50">No conversations yet</p>
                         ) : (
                             <AnimatePresence mode="popLayout">
                                 {branches.map((branch, i) => (
@@ -143,24 +145,24 @@ export function Sidebar({
                                         variants={itemVariants}
                                         initial="hidden"
                                         animate="visible"
-                                        exit={{ opacity: 0, x: -20 }}
+                                        exit={{ opacity: 0, x: -20, filter: "blur(4px)" }}
                                         layout
                                         className="group relative flex items-center"
                                     >
                                         <button
                                             onClick={() => onSelectBranch(branch.id)}
                                             className={cn(
-                                                "flex items-center gap-3 px-3 py-2 rounded-xl w-full text-left transition-all duration-300",
+                                                "flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-left transition-all duration-300 z-10 relative",
                                                 currentBranchId === branch.id
-                                                    ? "bg-primary text-primary-foreground shadow-lg scale-[1.02]"
-                                                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/80",
+                                                    ? "text-primary-foreground shadow-sm"
+                                                    : "text-muted-foreground hover:text-foreground",
                                                 isCollapsed && "justify-center px-0"
                                             )}
                                             title={isCollapsed ? branch.name : undefined}
                                         >
-                                            <ChatIcon className="h-4 w-4 shrink-0" />
+                                            <ChatIcon className={cn("h-4 w-4 shrink-0", currentBranchId === branch.id ? "text-primary-foreground" : "opacity-70")} />
                                             {!isCollapsed && (
-                                                <div className="flex-1 min-w-0 z-10">
+                                                <div className="flex-1 min-w-0">
                                                     <p className={cn(
                                                         "text-sm truncate transition-colors",
                                                         currentBranchId === branch.id ? "font-medium" : "font-normal"
@@ -171,11 +173,11 @@ export function Sidebar({
                                             )}
                                             {currentBranchId === branch.id && (
                                                 <motion.div
-                                                    layoutId="activeTab"
-                                                    className="absolute left-0 w-1 h-full bg-foreground rounded-r-full"
+                                                    layoutId="activeSidebarTabBackground"
+                                                    className="absolute inset-0 bg-primary/95 dark:bg-zinc-800 rounded-xl -z-10 shadow-sm border border-black/5 dark:border-white/5"
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
-                                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                                 />
                                             )}
                                         </button>

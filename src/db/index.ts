@@ -13,10 +13,10 @@ const localUrl = "postgresql://postgres@localhost:5432/postgres";
 const isNeon = !!(connectionString && connectionString.includes("neon.tech"));
 
 export const db = (isProduction && isNeon)
-    ? drizzleNeon(neon(connectionString!), { schema })
-    : drizzle(new Pool({ 
-        connectionString: isProduction ? connectionString : localUrl,
-        ssl: (isProduction && isNeon) ? { rejectUnauthorized: false } : false 
-      }), { schema });
+  ? drizzleNeon(neon(connectionString!), { schema })
+  : drizzle(new Pool({
+    connectionString: connectionString || localUrl,
+    ssl: (isProduction && isNeon) ? { rejectUnauthorized: false } : false
+  }), { schema });
 // Export schema for convenience
 export * from "./schema";

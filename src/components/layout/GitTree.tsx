@@ -164,7 +164,14 @@ export const GitTree = memo(function GitTree({
                                 {/* Child branches from main */}
                                 <AnimatePresence mode="popLayout">
                                     {childBranches.filter((b) => b.parentBranchId === mainBranch.id).length > 0 && (
-                                        <div className="ml-5 mt-2 border-l-2 border-border/70 pl-4 space-y-2">
+                                        <div className="relative ml-5 mt-2 pl-4 space-y-2">
+                                            {/* Animated Vertical Line */}
+                                            <motion.div 
+                                                initial={{ scaleY: 0 }} 
+                                                animate={{ scaleY: 1 }} 
+                                                transition={{ duration: 0.5, ease: "circOut" }}
+                                                className="absolute left-0 top-0 bottom-0 w-[2px] bg-border/70 origin-top" 
+                                            />
                                             {childBranches
                                                 .filter((b) => b.parentBranchId === mainBranch.id)
                                                 .map((branch, i) => (
@@ -241,7 +248,12 @@ const BranchNode = memo(function BranchNode({
         >
             {/* Connector line */}
             <div className="relative group/node">
-                <div className="absolute -left-4 top-1/2 w-4 h-px bg-border/50" />
+                <motion.div 
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ duration: 0.4, delay: index * 0.05, ease: "circOut" }}
+                    className="absolute -left-4 top-1/2 w-4 h-px bg-border/50 origin-left" 
+                />
                 <div className="flex items-center gap-1">
                     <button
                         onClick={() => onSelectBranch(branch.id)}
@@ -300,7 +312,14 @@ const BranchNode = memo(function BranchNode({
             {/* Nested children */}
             <AnimatePresence mode="popLayout">
                 {childBranches.length > 0 && depth < 3 && (
-                    <div className="ml-4 mt-1 border-l-2 border-border/70 pl-3 space-y-1">
+                    <div className="relative ml-4 mt-1 pl-3 space-y-1">
+                        {/* Animated Vertical Line */}
+                        <motion.div 
+                            initial={{ scaleY: 0 }} 
+                            animate={{ scaleY: 1 }} 
+                            transition={{ duration: 0.5, delay: index * 0.05, ease: "circOut" }}
+                            className="absolute left-0 top-0 bottom-0 w-[2px] bg-border/70 origin-top" 
+                        />
                         {childBranches.map((child, i) => (
                             <BranchNode
                                 key={child.id}
