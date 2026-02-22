@@ -424,22 +424,19 @@ export default function ChatPage() {
                     // Decode the newly received chunk
                     const text = decoder.decode(value, { stream: true });
 
-                    // Smoothly append the text chunk character by character
-                    for (let i = 0; i < text.length; i++) {
-                        fullContent += text[i];
-                        charCount++;
+                    // Smoothly append the text chunk in small groups to increase speed
+                    const chunkSize = 5; // Process 5 characters at a time
+                    for (let i = 0; i < text.length; i += chunkSize) {
+                        const chunk = text.slice(i, i + chunkSize);
+                        fullContent += chunk;
 
-                        // Small artificial delay to create typewriter effect
-                        // 2ms per char = ~500 chars per second (very fast but smooth)
-                        await new Promise((resolve) => setTimeout(resolve, 2));
+                        // Yield to event loop to create a blazing fast but smooth typewriter effect
+                        await new Promise((resolve) => setTimeout(resolve, 1));
 
-                        // Batch flushSync to avoid overwhelming React DOM updates
-                        // Flushing every 4 characters keeps it incredibly fluid at high speeds
-                        if (charCount % 4 === 0 || i === text.length - 1) {
-                            flushSync(() => {
-                                setStreamingContent(fullContent);
-                            });
-                        }
+                        // flushSync every cycle to keep it smooth
+                        flushSync(() => {
+                            setStreamingContent(fullContent);
+                        });
                     }
                 }
             }
