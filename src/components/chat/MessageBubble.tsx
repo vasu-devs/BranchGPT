@@ -8,6 +8,9 @@ import { GitBranch, ChevronLeft, ChevronRight, Copy, Check } from "lucide-react"
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 
 interface MessageBubbleProps {
@@ -174,7 +177,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                     {message.role === "system" && message.content.includes("### Transcript:") ? (
                         <div className="flex flex-col gap-4">
                             <div className="glass-card p-6 text-amber-900/80  font-medium italic border-amber-500/20 shadow-xl">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                     {message.content.split("\n\n### Transcript:\n")[0]}
                                 </ReactMarkdown>
                             </div>
@@ -186,7 +189,7 @@ export const MessageBubble = React.memo(function MessageBubble({
                             message.role === "system" ? "text-amber-800/90  italic font-medium border-amber-500/20" : "",
                             isStreaming && "transition-none shadow-none"
                         )}>
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>
                                 {message.content}
                             </ReactMarkdown>
                             {isStreaming && (

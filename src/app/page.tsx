@@ -416,15 +416,31 @@ export default function ChatPage() {
             let fullContent = "";
 
             if (reader) {
+                let charCount = 0;
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
+
+                    // Decode the newly received chunk
                     const text = decoder.decode(value, { stream: true });
-                    fullContent += text;
-                    // flushSync forces immediate DOM update for each chunk
-                    flushSync(() => {
-                        setStreamingContent(fullContent);
-                    });
+
+                    // Smoothly append the text chunk character by character
+                    for (let i = 0; i < text.length; i++) {
+                        fullContent += text[i];
+                        charCount++;
+
+                        // Small artificial delay to create typewriter effect
+                        // 2ms per char = ~500 chars per second (very fast but smooth)
+                        await new Promise((resolve) => setTimeout(resolve, 2));
+
+                        // Batch flushSync to avoid overwhelming React DOM updates
+                        // Flushing every 4 characters keeps it incredibly fluid at high speeds
+                        if (charCount % 4 === 0 || i === text.length - 1) {
+                            flushSync(() => {
+                                setStreamingContent(fullContent);
+                            });
+                        }
+                    }
                 }
             }
             setIsLoading(false);
