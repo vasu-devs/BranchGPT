@@ -230,7 +230,7 @@ export default function ChatPage() {
     };
 
     // Helper for demo siblings (recreated here to access dynamic import data if needed, or just use imported)
-    const getDemoSiblingsLocal = (messageId: string, allMessages: any[]) => {
+    const getDemoSiblingsLocal = (messageId: string, allMessages: { id: string, parentId: string | null }[]) => {
         const message = allMessages.find((m) => m.id === messageId);
         if (!message || !message.parentId) {
             return { siblings: [message!], currentIndex: 0 };
@@ -416,7 +416,6 @@ export default function ChatPage() {
             let fullContent = "";
 
             if (reader) {
-                let charCount = 0;
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
@@ -935,7 +934,7 @@ export default function ChatPage() {
                         <DialogHeader>
                             <DialogTitle className="text-2xl font-bold tracking-tight">Delete {deleteConfirmation.type === "branch" ? "Branch" : "Chat"}</DialogTitle>
                             <DialogDescription className="text-muted-foreground text-sm mt-3 leading-relaxed">
-                                Are you sure you want to delete <span className="text-foreground font-semibold">"{deleteConfirmation.name}"</span>? This action is permanent.
+                                Are you sure you want to delete <span className="text-foreground font-semibold">&quot;{deleteConfirmation.name}&quot;</span>? This action is permanent.
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="gap-3 mt-8">

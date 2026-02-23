@@ -13,7 +13,6 @@ import { HelpIcon } from "@/components/icons/HelpIcon";
 import { BranchIcon } from "@/components/icons/BranchIcon";
 import { MergeIcon } from "@/components/icons/MergeIcon";
 import { ForkIcon } from "@/components/icons/ForkIcon";
-import { cn } from "@/lib/utils";
 
 export function HelpDialog({ children }: { children?: React.ReactNode }) {
     return (
@@ -53,7 +52,7 @@ export function HelpDialog({ children }: { children?: React.ReactNode }) {
                             Forking (Branching)
                         </h3>
                         <p className="text-slate-600  pl-11 leading-relaxed">
-                            Explore "what ifs" by hovering over any message and clicking <strong className="text-slate-900  inline-flex items-center gap-1.5"><ForkIcon className="h-4 w-4" /> Fork</strong>. 
+                            Explore &quot;what ifs&quot; by hovering over any message and clicking <strong className="text-slate-900  inline-flex items-center gap-1.5"><ForkIcon className="h-4 w-4" /> Fork</strong>.
                             This preserves the history up to that point and starts a new parallel reality.
                         </p>
                     </section>
@@ -74,14 +73,14 @@ export function HelpDialog({ children }: { children?: React.ReactNode }) {
                             Merging
                         </h3>
                         <p className="text-slate-600  pl-11 leading-relaxed">
-                            Bring insights back to main by clicking <strong className="text-purple-500 inline-flex items-center gap-1.5"><MergeIcon className="h-4 w-4" /> Merge</strong>. 
+                            Bring insights back to main by clicking <strong className="text-purple-500 inline-flex items-center gap-1.5"><MergeIcon className="h-4 w-4" /> Merge</strong>.
                             The AI will distill your exploration into a concise summary injected into the parent branch.
                         </p>
                     </section>
 
                     <div className="pt-8 border-t border-white/5 flex justify-center">
                         <p className="text-xs text-slate-400/80 italic text-center max-w-sm leading-relaxed">
-                            "Conversation isn't a line; it's a living graph. In BranchGPT, you control the dimensions of thought."
+                            &quot;Conversation isn&apos;t a line; it&apos;s a living graph. In BranchGPT, you control the dimensions of thought.&quot;
                         </p>
                     </div>
                 </div>

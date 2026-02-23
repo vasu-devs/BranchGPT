@@ -4,7 +4,6 @@ import { Pool } from "pg";
 import { neon } from "@neondatabase/serverless";
 import * as schema from "./schema";
 
-const isProduction = process.env.NODE_ENV === "production";
 const connectionString = process.env.DATABASE_URL;
 const localUrl = "postgresql://postgres@localhost:5432/postgres";
 

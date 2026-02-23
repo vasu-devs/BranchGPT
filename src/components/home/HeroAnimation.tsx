@@ -6,8 +6,22 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 export function HeroAnimation() {
     const [step, setStep] = useState(0);
 
+    const [spores, setSpores] = useState<Record<string, number>[]>([]);
+
     // Sequence the animation steps
     useEffect(() => {
+        const timeout = setTimeout(() => {
+            setSpores([...Array(8)].map(() => ({
+                cx: 100 + Math.random() * 400,
+                cy: 300 + Math.random() * 100,
+                r: Math.random() * 2 + 1,
+                yTarget: -200 - Math.random() * 100,
+                xTarget: (Math.random() - 0.5) * 50,
+                duration: 8 + Math.random() * 5,
+                delay: Math.random() * 5,
+            })));
+        }, 0);
+
         const sequence = async () => {
             // 0 -> 1: The seed drops & roots spread
             await new Promise((r) => setTimeout(r, 800));
@@ -86,24 +100,24 @@ export function HeroAnimation() {
             >
                 {/* --- AMBIENT SPORES --- */}
                 <g className="opacity-40">
-                    {[...Array(8)].map((_, i) => (
+                    {spores.map((spore, i) => (
                         <motion.circle
                             key={i}
-                            cx={100 + Math.random() * 400}
-                            cy={300 + Math.random() * 100}
-                            r={Math.random() * 2 + 1}
+                            cx={spore.cx}
+                            cy={spore.cy}
+                            r={spore.r}
                             className="fill-amber-300 "
                             initial={{ y: 0, opacity: 0 }}
                             animate={{
-                                y: -200 - Math.random() * 100,
+                                y: spore.yTarget,
                                 opacity: [0, 0.8, 0],
-                                x: (Math.random() - 0.5) * 50
+                                x: spore.xTarget
                             }}
                             transition={{
-                                duration: 8 + Math.random() * 5,
+                                duration: spore.duration,
                                 repeat: Infinity,
                                 ease: "linear",
-                                delay: Math.random() * 5
+                                delay: spore.delay
                             }}
                         />
                     ))}

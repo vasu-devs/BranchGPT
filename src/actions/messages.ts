@@ -57,6 +57,7 @@ export async function getConversationHistory(nodeId: string): Promise<Message[]>
 
     // Map raw query results (snake_case) to application type (camelCase)
     // Drizzle's execute returns raw row data via .rows property
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return result.rows.map((row: any) => ({
         id: row.id,
         content: row.content,
@@ -419,7 +420,7 @@ export async function deleteBranch(branchId: string): Promise<void> {
 export async function generateBranchTitle(content: string): Promise<string> {
     try {
         // Production: Sanitize and limit input length for LLM safety
-        const safeContent = content.slice(0, 500); 
+        const safeContent = content.slice(0, 500);
 
         const { text } = await generateText({
             model: groq("llama-3.3-70b-versatile"),
@@ -496,7 +497,7 @@ Format the output as a concise markdown summary. Do not use conversational fille
     // If parent has no messages (unlikely if it's a parent), use parent's root? 
     // If parent head is null, it means its empty or verified elsewhere.
 
-    let parentMessageId = parentHead ? parentHead.id : branch.rootMessageId;
+    const parentMessageId = parentHead ? parentHead.id : branch.rootMessageId;
     // Fallback to rootMessageId is risky if rootMessageId belongs to grand-parent. 
     // But if parentBranchId exists, there must be a path.
 

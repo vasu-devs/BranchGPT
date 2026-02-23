@@ -124,7 +124,7 @@ export function ChatView({
                                 Plant a Seed.
                             </h2>
                             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed mb-4 sm:mb-6 font-medium px-4">
-                                Human intelligence isn't linear. It forks, roots, and flourishes.
+                                Human intelligence isn&apos;t linear. It forks, roots, and flourishes.
                                 <span className="block mt-1 sm:mt-2 text-foreground/80 font-bold tracking-wide">Grow your ideas organically.</span>
                             </p>
 
