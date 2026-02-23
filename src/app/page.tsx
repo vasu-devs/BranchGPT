@@ -383,6 +383,7 @@ export default function ChatPage() {
             setBranchName(branch.name);
             setMessages([]);
             setCurrentNodeId(null);
+            setDemoMode(false);
 
         } catch (error) {
             console.error("Failed to create new chat:", error);
@@ -451,8 +452,41 @@ export default function ChatPage() {
     };
 
     const handleSendMessage = async (content: string) => {
-        if (demoMode) return;
-        if (!currentBranchId) return;
+        let activeBranchId = currentBranchId;
+        let activeNodeId = currentNodeId;
+        let activeConversationId = currentConversationId;
+        const isFromDemo = demoMode;
+
+        if (demoMode) {
+            try {
+                const { branch } = await createConversation();
+                const newConv: BranchInfo = {
+                    id: branch.id,
+                    name: branch.name,
+                    messageCount: 0,
+                    createdAt: branch.createdAt,
+                    parentBranchId: null,
+                    rootMessageId: null,
+                    isMain: true
+                };
+
+                setConversations(prev => [newConv, ...prev]);
+                setCurrentConversationId(branch.id);
+                setCurrentTreeBranches([newConv]);
+                setCurrentBranchId(branch.id);
+                setBranchName(branch.name);
+                setDemoMode(false);
+
+                activeBranchId = branch.id;
+                activeNodeId = null;
+                activeConversationId = branch.id;
+            } catch (error) {
+                console.error("Failed to create new chat for message:", error);
+                return;
+            }
+        }
+
+        if (!activeBranchId) return;
 
         // Optimistic Update
         const tempId = `temp-${Date.now()}`;
@@ -460,8 +494,8 @@ export default function ChatPage() {
             id: tempId,
             content,
             role: "user",
-            parentId: currentNodeId,
-            branchId: currentBranchId,
+            parentId: activeNodeId,
+            branchId: activeBranchId,
             isHead: true,
             createdAt: new Date(),
             siblingCount: 1,
@@ -469,17 +503,17 @@ export default function ChatPage() {
         };
 
         setMessages((prev) => {
-            const newMessages = [...prev, optimisticMessage];
+            const newMessages = isFromDemo ? [optimisticMessage] : [...prev, optimisticMessage];
             // Update cache immediately
             setConversationCache(cache => ({
                 ...cache,
-                [currentBranchId]: newMessages
+                [activeBranchId]: newMessages
             }));
             return newMessages;
         });
 
         // Save current state for rollback if needed (basic)
-        const previousNodeId = currentNodeId;
+        const previousNodeId = activeNodeId;
 
         try {
             // Note: We don't set CurrentNodeId to tempId because dependent actions need real ID
@@ -488,8 +522,8 @@ export default function ChatPage() {
             const userMessage = await createMessage({
                 content,
                 role: "user",
-                parentId: currentNodeId, // Use real parent ID
-                branchId: currentBranchId,
+                parentId: activeNodeId, // Use real parent ID
+                branchId: activeBranchId,
                 isHead: true,
             });
 
@@ -506,7 +540,7 @@ export default function ChatPage() {
                 // Update cache with real ID
                 setConversationCache(cache => ({
                     ...cache,
-                    [currentBranchId]: newMessages
+                    [activeBranchId]: newMessages
                 }));
 
                 return newMessages;
@@ -515,13 +549,63 @@ export default function ChatPage() {
             // We need to fetch siblings correctly now that it's persisted
             // But for performance effectively we just leave it as is until next load
 
-            const aiResponse = await streamAIResponse(content);
-            if (aiResponse && currentBranchId) {
+            // Now that everything is updated properly, set messages to what is currently loaded
+            const currentMessagesToStreamWith = isFromDemo ? [userMessage] : messages;
+
+            // Actually, streamAIResponse uses the `messages` state which might theoretically be stale if closure didn't update.
+            // Let's modify streamAIResponse logic slightly inline or rely on the state update.
+            // Let's just pass `currentMessagesToStreamWith` directly to fetch so we don't rely on the stale `messages` state in `streamAIResponse`.
+            setIsLoading(true);
+            setStreamingContent("");
+            const aiMessages = currentMessagesToStreamWith.map((msg) => ({
+                role: msg.role as "user" | "assistant" | "system",
+                content: msg.content,
+            }));
+            aiMessages.push({ role: "user", content });
+
+            let aiResponse = null;
+            try {
+                const response = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: aiMessages }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMessage = errorData.error || `HTTP error! status: ${response.status}`;
+                    throw new Error(errorMessage);
+                }
+
+                const reader = response.body?.getReader();
+                const decoder = new TextDecoder();
+                aiResponse = "";
+
+                if (reader) {
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const text = decoder.decode(value, { stream: true });
+                        aiResponse += text;
+                        setStreamingContent(aiResponse);
+
+                        // We do not smoothly animate inside the render queue for sending the full message as to avoid blocking JS
+                        // Instead, we just trust React's state update.
+                        await new Promise((resolve) => setTimeout(resolve, 10));
+                    }
+                }
+            } catch (err) {
+                console.error("Streaming error:", err);
+            }
+            setIsLoading(false);
+
+            if (aiResponse && activeBranchId) {
                 const savedMessage = await createMessage({
                     content: aiResponse,
                     role: "assistant",
                     parentId: userMessage.id,
-                    branchId: currentBranchId,
+                    branchId: activeBranchId,
                     isHead: true,
                 });
                 setCurrentNodeId(savedMessage.id);
@@ -539,28 +623,28 @@ export default function ChatPage() {
                     // Update cache
                     setConversationCache(cache => ({
                         ...cache,
-                        [currentBranchId]: newMessages
+                        [activeBranchId]: newMessages
                     }));
                     return newMessages;
                 });
 
-                if (currentConversationId) {
+                if (activeConversationId) {
                     // Optimized silent update of tree
-                    getBranchTreeDetailed(currentConversationId).then(branchesWithCount => {
+                    getBranchTreeDetailed(activeConversationId).then(branchesWithCount => {
                         setCurrentTreeBranches(branchesWithCount);
                     });
                 }
 
                 // If this is the START of a new conversation (or a branch with default name), trigger naming
-                if (messages.length === 0 && currentBranchId) {
+                if (!activeNodeId && activeBranchId) {
                     generateBranchTitle(content).then(async (name) => {
-                        if (!currentBranchId) return;
-                        await updateBranchName(currentBranchId, name);
+                        if (!activeBranchId) return;
+                        await updateBranchName(activeBranchId, name);
                         setBranchName(name);
 
                         // Update local state for sidebar and tree
-                        setConversations(prev => prev.map(c => c.id === currentBranchId ? { ...c, name } : c));
-                        setCurrentTreeBranches(prev => prev.map(b => b.id === currentBranchId ? { ...b, name } : b));
+                        setConversations(prev => prev.map(c => c.id === activeBranchId ? { ...c, name } : c));
+                        setCurrentTreeBranches(prev => prev.map(b => b.id === activeBranchId ? { ...b, name } : b));
                     });
                 }
             } else {
@@ -571,13 +655,17 @@ export default function ChatPage() {
             console.error("Failed to send message:", error);
             // Rollback optimistic update
             setMessages((prev) => prev.filter(m => m.id !== tempId));
+            setIsLoading(false);
             setStreamingContent(undefined);
             alert(`Failed to send message: ${error instanceof Error ? error.message : "Unknown error"}`);
         }
     };
 
     const handleFork = async (messageId: string, newContent: string) => {
-        if (demoMode) return;
+        if (demoMode) {
+            alert("Forking is disabled in the introductory tour. Plant your own seed to explore branching!");
+            return;
+        }
         if (!newContent.trim()) return;
 
         const optimisticBranchId = `temp-branch-${Date.now()}`;
