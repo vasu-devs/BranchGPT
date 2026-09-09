@@ -4,7 +4,7 @@
 
 BranchGPT reimplements the chat interface as a **Directed Acyclic Graph (DAG)**. Unlike standard linear chatbots, BranchGPT allows you to **fork** any message into a new branch, explore parallel ideas, and **merge** valuable insights back into the main thread—just like Git, but for thinking.
 
-Made with ❤️ by **[Vasu-DevS](https://vasudev.live)**
+Made with ❤️ by **[Vasu-DevS](https://siddhvasudev.com)**
 
 ## ✨ Key Features
 
@@ -84,4 +84,4 @@ Use the **Git Tree** sidebar on the right to visualize your entire conversation 
 
 ## 📄 License
 
-MIT © [Vasu-DevS](https://vasudev.live)
+MIT © [Vasu-DevS](https://siddhvasudev.com)

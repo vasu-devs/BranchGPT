@@ -114,7 +114,7 @@ export function ChatInput({
                 <motion.a
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    href="https://vasudev.live"
+                    href="https://siddhvasudev.com"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-xs font-semibold text-slate-400 hover:text-slate-600 :text-slate-200 transition-all flex items-center gap-2 px-5 py-2 rounded-full border border-slate-200/30  bg-white/5  backdrop-blur-md"

@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BranchGPT . thinking isnt linear its branched.",
   description: "BranchGPT , a new form of chat interface , with git basaed branching , forking , merging and built using DAG",
-  metadataBase: new URL("https://branchgpt.vasudev.live"),
+  metadataBase: new URL("https://branchgpt.siddhvasudev.com"),
   openGraph: {
     title: "BranchGPT . thinking isnt linear its branched.",
     description: "BranchGPT , a new form of chat interface , with git basaed branching , forking , merging and built using DAG",
-    url: "https://branchgpt.vasudev.live",
+    url: "https://branchgpt.siddhvasudev.com",
     siteName: "BranchGPT",
     images: [
       {
